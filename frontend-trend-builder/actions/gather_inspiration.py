@@ -9,8 +9,9 @@ from typing import List, Dict, Union
 # Obtain an Unsplash Access Key by registering an application at https://unsplash.com/developers
 # If you have a key, replace "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE" with it.
 # If you don't have a key, or for offline use, it will fallback to HTML scraping then mock data.
-UNSPLASH_ACCESS_KEY = "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE" 
+# UNSPLASH_ACCESS_KEY = "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE" # Old placeholder
 # UNSPLASH_ACCESS_KEY = None # Set to None to skip API attempt directly
+from ..config import UNSPLASH_API_KEY # Use config.py
 
 # Determine the absolute path to the mock data file
 DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'mock_inspiration_data.json')
@@ -21,14 +22,14 @@ if not logging.getLogger().hasHandlers():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
 
-def _fetch_from_unsplash_api(prompt: str, access_key: str) -> Union[List[Dict], None]:
+def _fetch_from_unsplash_api(prompt: str) -> Union[List[Dict], None]: # Removed access_key parameter
     """Helper to fetch and parse data from Unsplash API."""
-    if not access_key or access_key == "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE":
-        logging.info("Unsplash API key not provided or is placeholder. Skipping API call.")
+    if not UNSPLASH_API_KEY: # Use imported config variable
+        logging.info("Unsplash API key not found in config. Skipping API call.")
         return None
 
     encoded_prompt = urllib.parse.quote_plus(prompt)
-    api_url = f"https://api.unsplash.com/search/photos?query={encoded_prompt}&per_page=5&client_id={access_key}"
+    api_url = f"https://api.unsplash.com/search/photos?query={encoded_prompt}&per_page=5&client_id={UNSPLASH_API_KEY}" # Use imported
     logging.info(f"Attempting Unsplash API call: {api_url}")
 
     # This import is here because view_text_website is a tool provided by the environment,
@@ -204,13 +205,13 @@ def get_inspiration(prompt: str) -> Union[str, List[Dict]]:
     logging.info(f"Starting inspiration gathering for prompt: '{prompt}'")
 
     # 1. Attempt Unsplash API Call
-    if UNSPLASH_ACCESS_KEY and UNSPLASH_ACCESS_KEY != "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE":
-        api_results = _fetch_from_unsplash_api(prompt, UNSPLASH_ACCESS_KEY)
+    if UNSPLASH_API_KEY: # Check if key exists from config
+        api_results = _fetch_from_unsplash_api(prompt) # Pass prompt only
         if api_results:
             return api_results
         logging.info("Unsplash API call did not return results or failed, proceeding to next method.")
     else:
-        logging.info("Unsplash API key not configured. Skipping API call.")
+        logging.info("Unsplash API key not configured in config.py. Skipping API call.")
 
     # 2. Attempt Unsplash HTML Scraping (Experimental)
     # Note: view_text_website might not be suitable for complex JS-rendered pages.
@@ -242,12 +243,12 @@ if __name__ == '__main__':
     # Example 2: Test with a generic prompt, showing URL formation if key was present
     prompt_generic = "modern dashboard"
     logging.info(f"\n--- Testing with prompt: '{prompt_generic}' ---")
-    if UNSPLASH_ACCESS_KEY and UNSPLASH_ACCESS_KEY != "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE":
-        logging.info("An API key is present, actual API call will be attempted by get_inspiration.")
+    if UNSPLASH_API_KEY: # Check imported config variable
+        logging.info("An API key is present in config, actual API call will be attempted by get_inspiration.")
     else:
-        logging.info("No valid API key. This run will attempt scraping then mock data.")
+        logging.info("No valid API key in config. This run will attempt scraping then mock data.")
         encoded_p = urllib.parse.quote_plus(prompt_generic)
-        logging.info(f"If API key were valid, API URL would be: https://api.unsplash.com/search/photos?query={encoded_p}&per_page=5&client_id=YOUR_KEY")
+        logging.info(f"If API key were valid, API URL would be: https://api.unsplash.com/search/photos?query={encoded_p}&per_page=5&client_id=CONFIGURED_KEY")
         logging.info(f"Scraping URL would be: https://unsplash.com/s/photos/{encoded_p}")
 
     inspiration_generic = get_inspiration(prompt_generic)

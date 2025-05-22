@@ -6,8 +6,9 @@ from typing import List, Dict, Union
 # --- Configuration for Google Fonts API ---
 # Obtain a Google Fonts API Key from the Google Cloud Console.
 # If you have a key, replace "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE" with it.
-GOOGLE_FONTS_API_KEY = "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE"
+# GOOGLE_FONTS_API_KEY = "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE" # Old placeholder
 # GOOGLE_FONTS_API_KEY = None # Set to None to skip API attempt directly
+from ..config import GOOGLE_FONTS_API_KEY # Use config.py
 
 # Determine the absolute path to the mock data file
 ASSET_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'mock_asset_data.json')
@@ -17,10 +18,10 @@ if not logging.getLogger().hasHandlers():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
 
-def _fetch_fonts_from_google_api(categories: List[str], access_key: str) -> List[Dict]:
+def _fetch_fonts_from_google_api(categories: List[str]) -> List[Dict]: # Removed access_key parameter
     """Helper to fetch and parse font data from Google Fonts API."""
-    if not access_key or access_key == "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE":
-        logging.info("Google Fonts API key not provided or is placeholder. Skipping API call for fonts.")
+    if not GOOGLE_FONTS_API_KEY: # Use imported config variable
+        logging.info("Google Fonts API key not found in config. Skipping API call for fonts.")
         return []
 
     font_suggestions = []
@@ -37,7 +38,7 @@ def _fetch_fonts_from_google_api(categories: List[str], access_key: str) -> List
         # lists ALL fonts. We'd have to filter by category client-side.
         # For simplicity, let's assume we fetch all and then filter, or if a category filter existed, use it.
         # The provided URL sorts by popularity. We'll fetch the list and filter.
-        api_url = f"https://www.googleapis.com/webfonts/v1/webfonts?key={access_key}&sort=popularity"
+        api_url = f"https://www.googleapis.com/webfonts/v1/webfonts?key={GOOGLE_FONTS_API_KEY}&sort=popularity" # Use imported
         logging.info(f"Attempting Google Fonts API call for category '{category}' (will filter client-side): {api_url}")
         
         try:
@@ -101,16 +102,16 @@ def get_asset_suggestions(inspiration_summary: str, trend_tags: List[str]) -> Li
         font_categories_to_fetch.extend(["serif", "sans-serif"])
 
 
-    if GOOGLE_FONTS_API_KEY and GOOGLE_FONTS_API_KEY != "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE" and font_categories_to_fetch:
+    if GOOGLE_FONTS_API_KEY and font_categories_to_fetch: # Check imported config variable
         logging.info(f"Relevant font trends found ({font_categories_to_fetch}), attempting Google Fonts API call.")
-        font_suggestions_api = _fetch_fonts_from_google_api(list(set(font_categories_to_fetch)), GOOGLE_FONTS_API_KEY)
+        font_suggestions_api = _fetch_fonts_from_google_api(list(set(font_categories_to_fetch))) # Pass categories only
         if font_suggestions_api:
             final_suggestions.extend(font_suggestions_api)
             logging.info(f"Added {len(font_suggestions_api)} fonts from Google Fonts API.")
         else:
             logging.info("Google Fonts API call did not yield results. Will use mock data for fonts.")
     else:
-        logging.info("Skipping Google Fonts API call (no key or no relevant font trends).")
+        logging.info("Skipping Google Fonts API call (no key in config or no relevant font trends).")
 
     # 2. Process mock_asset_data.json for other assets and fallback fonts
     logging.info("Loading other assets (icons, images) and fallback fonts from mock data.")
@@ -172,10 +173,10 @@ if __name__ == '__main__':
     insp_1 = "An elegant blog design that needs a good serif font."
     trends_1 = ["serif_fonts", "minimalism", "light_mode"]
     logging.info(f"\n--- Testing with: '{insp_1}', Trends: {trends_1} ---")
-    if not GOOGLE_FONTS_API_KEY or GOOGLE_FONTS_API_KEY == "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE":
-        logging.info("NOTE: No valid Google Fonts API key. Expecting fallback to mock fonts.")
+    if not GOOGLE_FONTS_API_KEY: # Check imported config variable
+        logging.info("NOTE: No valid Google Fonts API key in config. Expecting fallback to mock fonts.")
     else:
-        logging.info("NOTE: Google Fonts API key found. Expecting API call for 'serif'.")
+        logging.info("NOTE: Google Fonts API key found in config. Expecting API call for 'serif'.")
     
     suggestions_1 = get_asset_suggestions(insp_1, trends_1)
     if suggestions_1:

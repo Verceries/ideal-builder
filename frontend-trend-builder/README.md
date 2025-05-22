@@ -1,40 +1,31 @@
 # Frontend Trend Builder
 
-**Version:** 0.3.0 (Live Data Integration - Conceptual)
+**Version:** 0.4.0 (Centralized Configuration)
 
 ## Description
 
-The Frontend Trend Builder is an autonomous agent designed to streamline the initial phases of frontend development. It attempts to gather live design inspiration (from Unsplash) and font suggestions (from Google Fonts) if API keys are configured. If live data fetching is not possible (e.g., missing keys, network issues), it falls back to analyzing user prompts against local mock data. It then interprets current UI/UX trends from a predefined dictionary and uses this information to generate boilerplate frontend code (React + Tailwind CSS) and suggest relevant assets. This agent aims to accelerate the process of translating ideas into tangible frontend structures.
+The Frontend Trend Builder is an autonomous agent designed to streamline the initial phases of frontend development. It attempts to gather live design inspiration (from Unsplash) and font suggestions (from Google Fonts) if API keys are configured via a `.env` file. If live data fetching is not possible (e.g., missing keys, network issues), it falls back to analyzing user prompts against local mock data. It then interprets current UI/UX trends from a predefined dictionary and uses this information to generate boilerplate frontend code (React + Tailwind CSS) and suggest relevant assets. This agent aims to accelerate the process of translating ideas into tangible frontend structures.
 
 ## Features
 
 -   **Gathers Inspiration (Live & Mock Data):**
-    -   **Live (Conceptual):** Attempts to fetch inspiration images from Unsplash via its API if an `UNSPLASH_ACCESS_KEY` is configured.
+    -   **Live (Conceptual):** Attempts to fetch inspiration images from Unsplash via its API if `UNSPLASH_API_KEY` is configured in `.env`.
     -   **Experimental Scraping:** If the Unsplash API call fails or is not configured, it attempts a basic HTML scrape of Unsplash search results.
     -   **Fallback:** If live/scraped data is unavailable, it filters local mock inspiration data based on keywords in a user-provided prompt.
--   **Analyzes Trends:** Identifies relevant UI/UX trends (e.g., "glassmorphism", "minimalism", "dark_mode", "pastel_colors", "serif_fonts") from the prompt and inspiration summary using an expanded keyword dictionary. Includes broader trend recognition for styles like cyberpunk, art deco, skeuomorphism, playful, and corporate aesthetics, among others.
+-   **Analyzes Trends:** Identifies relevant UI/UX trends from the prompt and inspiration summary using an expanded keyword dictionary. Includes broader trend recognition for styles like cyberpunk, art deco, skeuomorphism, playful, and corporate aesthetics, among others.
 -   **Generates React + Tailwind CSS Code:**
     -   Creates code for individual components including: Buttons, Cards, Login Forms, NavBars, Footers, Hero Sections, Feature Cards, and Testimonials.
     -   Generates "full-page" layouts by assembling a sensible structure from available components.
-    -   Applies styling to components responsive to identified trends and color modes. For example, the "cyberpunk" trend might generate elements with neon-like text and sharp, dark backgrounds, while "playful_aesthetic" might use more rounded elements and brighter accents.
+    -   Applies styling to components responsive to identified trends and color modes.
 -   **Suggests Assets (Live & Mock Data):**
-    -   **Live Fonts (Conceptual):** Attempts to fetch font suggestions from the Google Fonts API if a `GOOGLE_FONTS_API_KEY` is configured and relevant font trends (e.g., "serif_fonts") are identified.
+    -   **Live Fonts (Conceptual):** Attempts to fetch font suggestions from the Google Fonts API if `GOOGLE_FONTS_API_KEY` is configured in `.env` and relevant font trends are identified.
     -   **Mock Assets:** Recommends other assets (icons, images) and fallback fonts from local mock data, aligning with design trends and inspiration.
 
 ## Inputs
 
 The agent accepts the following inputs, defined in `schema.py` as `AgentInput`:
 
--   `prompt` (str): A textual description of the desired UI component or page. Examples:
-    -   `"a sleek login form with glassmorphism"`
-    -   `"a full-page landing site with a hero section, using glassmorphism and dark mode"`
-    -   `"a minimalist navigation bar with serif fonts"`
-    -   `"a feature card component with pastel colors"`
-    -   `"generate a page with a navbar, three feature cards, and a footer"`
-    -   `"dark mode testimonial quote"`
-    -   `"a playful onboarding modal with handwritten fonts"`
-    -   `"a cyberpunk dashboard header with neon future elements"`
-    -   `"corporate style button for a formal UI"`
+-   `prompt` (str): A textual description of the desired UI component or page.
 -   `tech_stack` (Literal["react-tailwind", "html-css", "vue", "svelte"]): The desired technology stack. **Currently, only "react-tailwind" is implemented for code generation.**
 -   `color_mode` (Literal["light", "dark", "auto"]): The preferred color scheme for the UI.
 -   `layout_type` (Literal["component", "full-page"]): Specifies whether to generate a single component or a full page structure.
@@ -44,34 +35,50 @@ The agent accepts the following inputs, defined in `schema.py` as `AgentInput`:
 The agent produces the following outputs, defined in `schema.py` as `AgentOutput`:
 
 -   `frontend_code` (str): The generated frontend code (React + Tailwind CSS).
--   `asset_suggestions` (List[Dict]): A list of suggested asset dictionaries (name, type, URL mock, tags), potentially including fonts from Google Fonts API.
+-   `asset_suggestions` (List[Dict]): A list of suggested asset dictionaries.
 -   `trend_tags` (List[str]): A list of identified UI/UX trends.
--   `inspiration_summary` (str): A summary string derived from matched inspiration items (live or mock).
+-   `inspiration_summary` (str): A summary string derived from matched inspiration items.
 
 ## Configuration (API Keys for Live Data)
 
-To enable live data fetching for inspiration and fonts, you need to configure API keys:
+This project can connect to external APIs (like Unsplash and Google Fonts) to fetch live inspiration data and font suggestions. To enable these features, you need to provide your own API keys using a `.env` file.
 
-1.  **Unsplash API Key (for Inspiration Images):**
-    *   Obtain an Access Key by registering an application at [https://unsplash.com/developers](https://unsplash.com/developers).
-    *   Open the file: `frontend-trend-builder/actions/gather_inspiration.py`.
-    *   Find the line: `UNSPLASH_ACCESS_KEY = "YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE"`
-    *   Replace `"YOUR_UNSPLASH_ACCESS_KEY_IF_AVAILABLE"` with your actual Unsplash Access Key.
-    *   If this key is not provided or remains the placeholder, the agent will attempt HTML scraping, and then fall back to mock data for inspiration.
+1.  **Install `python-dotenv`**:
+    This project uses the `python-dotenv` library to load environment variables from a `.env` file. If you are setting this project up manually and haven't installed dependencies, you might need to install it:
+    ```bash
+    pip install python-dotenv
+    ```
+    *(Note: If a `requirements.txt` file is present in the project, prefer installing dependencies from it, e.g., `pip install -r requirements.txt`)*
 
-2.  **Google Fonts API Key (for Font Suggestions):**
-    *   Obtain an API Key from the [Google Cloud Console](https://console.cloud.google.com/apis/library/webfonts.googleapis.com).
-    *   Open the file: `frontend-trend-builder/actions/suggest_assets.py`.
-    *   Find the line: `GOOGLE_FONTS_API_KEY = "YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE"`
-    *   Replace `"YOUR_GOOGLE_FONTS_API_KEY_IF_AVAILABLE"` with your actual Google Fonts API Key.
-    *   If this key is not provided or remains the placeholder, the agent will use mock font data.
+2.  **Create your `.env` file**:
+    In the root of the `frontend-trend-builder` project, copy the example environment file:
+    ```bash
+    cp .env.example .env
+    ```
 
-**Note:** The agent uses the `view_text_website` tool to simulate API calls. In a real-world scenario, these would be direct HTTP requests using libraries like `requests`.
+3.  **Edit your `.env` file**:
+    Open the newly created `.env` file with a text editor and add your API keys:
+    ```env
+    # Unsplash API Key (Client ID)
+    # Obtain from your Unsplash developer dashboard: https://unsplash.com/developers
+    UNSPLASH_API_KEY=YOUR_ACTUAL_UNSPLASH_KEY_HERE
+
+    # Google Fonts API Key
+    # Obtain from your Google Cloud Platform Console: https://console.cloud.google.com/apis/credentials
+    GOOGLE_FONTS_API_KEY=YOUR_ACTUAL_GOOGLE_FONTS_KEY_HERE
+    ```
+    Replace `YOUR_ACTUAL_..._KEY_HERE` with your real keys.
+
+The application, via `config.py`, will load these keys from the `.env` file at runtime. If keys are not provided or are invalid, the agent will gracefully fall back to using local mock data for inspiration and font suggestions.
+
+**Important:** Remember to keep your `.env` file private and **do not commit it to version control**. The `.gitignore` file in this project is already configured to ignore `.env` files.
+
+**Note on API Usage Simulation:** The agent uses the `view_text_website` tool to simulate API calls. In a real-world scenario, these would be direct HTTP requests using libraries like `requests`.
 
 ## How to Run
 
 1.  Ensure you have Python installed.
-2.  (Optional) Configure API keys as described in the "Configuration" section.
+2.  (Optional but recommended for live data) Configure API keys by creating and filling a `.env` file as described in the "Configuration" section.
 3.  Navigate to the `frontend-trend-builder` root directory.
 4.  The primary way to interact with the agent is by calling the `run_agent` function from `frontend_trend_builder.main`.
 
@@ -111,7 +118,7 @@ print(output['inspiration_summary'])
 
 ## Limitations and Known Issues
 
--   **API Key Requirement:** Live API integration for Unsplash and Google Fonts requires users to obtain and insert their own API keys. Without these, the agent gracefully falls back to mock data.
+-   **API Key Requirement:** Live API integration for Unsplash and Google Fonts requires users to obtain and correctly configure their own API keys in the `.env` file. Without these, the agent gracefully falls back to mock data.
 -   **Experimental Scraping:** The HTML scraping for Unsplash inspiration is a basic implementation and is highly dependent on Unsplash's website structure. It may break if the site's HTML changes significantly.
 -   **API Rate Limits:** If using personal or demo API keys, be mindful of potential rate limits imposed by Unsplash and Google Fonts.
 -   **Simulated API Calls:** External API calls are simulated using a `view_text_website` tool. A production version would use direct HTTP requests.
@@ -122,7 +129,10 @@ print(output['inspiration_summary'])
 -   `frontend-trend-builder/`
     -   `actions/`: Contains Python scripts for individual agent capabilities.
         -   `code_templates/`: Contains React+Tailwind CSS component string templates.
+    -   `config.py`: Manages loading of API keys from the `.env` file.
     -   `data/`: Contains JSON files for mock inspiration, trend definitions, and mock assets.
+    -   `.env.example`: Example file for environment variable configuration.
+    -   `.gitignore`: Specifies intentionally untracked files (like `.env`).
     -   `tests/`: Contains unit tests for the agent's components.
     -   `main.py`: The main executable script that orchestrates the agent's workflow and includes example runs.
     -   `schema.py`: Defines the data structures (`AgentInput`, `AgentOutput`) for agent inputs and outputs.
