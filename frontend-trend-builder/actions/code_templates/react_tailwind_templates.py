@@ -2,6 +2,11 @@
 React + Tailwind CSS component templates.
 Each function returns a string representing a React functional component.
 """
+import logging # Added
+
+# Get a logger instance for this module
+logger = logging.getLogger(__name__) # Added
+
 
 def get_button_template(text: str = "Click Me", custom_styles: str = "") -> str:
     """Returns a string for a React button component with Tailwind CSS."""
@@ -40,7 +45,7 @@ def get_login_form_template(custom_styles: str = "") -> str:
     """Returns a string for a basic React login form with Tailwind CSS."""
     base_styles = "p-8 rounded-lg shadow-lg w-full max-w-sm"
     combined_styles = f"{base_styles} {custom_styles}".strip()
-    button_custom_styles = "w-full" # Example: make button full width
+    button_custom_styles = "w-full" 
 
     return f"""
 const LoginForm = () => {{
@@ -74,36 +79,6 @@ const LoginForm = () => {{
 
 export default LoginForm;
 """
-
-if __name__ == "__main__":
-    print("--- Button Template ---")
-    print(get_button_template())
-    print("\n--- Button Template (Custom) ---")
-    print(get_button_template(text="Submit", custom_styles="bg-green-500 hover:bg-green-700"))
-
-    print("\n--- Card Template ---")
-    print(get_card_template())
-    print("\n--- Card Template (Custom) ---")
-    print(get_card_template(title="My Custom Card", content="This is custom content.", custom_styles="border-2 border-blue-500"))
-
-    print("\n--- Login Form Template ---")
-    print(get_login_form_template(custom_styles="bg-gray-100"))
-    print("\n--- Login Form Template (Dark Mode Attempt) ---")
-    print(get_login_form_template(custom_styles="bg-gray-800 text-white"))
-
-    # Example of how the login form reuses the button, though the output here will be verbose
-    # print("\n--- Login Form with Dark Button ---")
-    # Note: The button within the login form is also a template; direct styling is tricky here
-    # without more complex template logic. This is a simplified example.
-    # For now, the button inside login will get its own dark mode if custom_styles for login form is dark.
-    # A more robust solution would pass dark mode props down.
-    dark_login_form = get_login_form_template(custom_styles="bg-gray-700 text-gray-200")
-    # To make the button inside also dark, we'd need to adjust get_login_form_template
-    # to pass appropriate styles to its internal get_button_template call,
-    # or the button template itself needs to be dark mode aware based on its own custom_styles.
-    # The current get_button_template doesn't automatically inherit parent dark mode.
-    print(dark_login_form)
-
 
 # --- New Templates from Step 15 ---
 
@@ -171,17 +146,16 @@ def get_footer_template(copyrightText="© 2024 Your Company", socialLinks=None, 
           </a>"""
 
     link_columns_html = ""
-    if linkColumns: # Expects linkColumns to be a list of dicts like: [{'title': 'Column 1', 'links': [{'text': 'Link 1', 'href': '#'}]}]
+    if linkColumns: 
         link_columns_html = "<div class='grid grid-cols-2 md:grid-cols-4 gap-8 mb-8'>"
         for col in linkColumns:
             link_columns_html += "\n<div>"
             link_columns_html += f"<h3 class='text-sm font-semibold text-gray-600 uppercase tracking-wider'>{col['title']}</h3>"
             link_columns_html += "<ul class='mt-4 space-y-2'>"
-            for link in col['links']:
-                link_columns_html += f"<li><a href='{link['href']}' class='text-gray-500 hover:text-gray-900 text-base'>{link['text']}</a></li>"
+            for link_item in col['links']: # Changed variable name to avoid conflict
+                link_columns_html += f"<li><a href='{link_item['href']}' class='text-gray-500 hover:text-gray-900 text-base'>{link_item['text']}</a></li>"
             link_columns_html += "</ul>\n</div>"
         link_columns_html += "\n</div>"
-
 
     base_styles = "bg-gray-100 text-gray-700 py-12"
     combined_styles = f"{base_styles} {styles}".strip()
@@ -226,7 +200,7 @@ def get_hero_template(heading="Main Heading", subheading="Subheading text...", p
         {/* Background Image Placeholder: Implement as needed, e.g., a div with background-image style */}
         <div className="absolute inset-0 bg-gray-300 opacity-50 -z-10"></div>"""
 
-    base_styles = "bg-gray-50 py-12 sm:py-20 relative" # Added relative for z-indexing of placeholder
+    base_styles = "bg-gray-50 py-12 sm:py-20 relative" 
     combined_styles = f"{base_styles} {styles}".strip()
 
     return f"""
@@ -284,10 +258,8 @@ def get_feature_card_template(iconPlaceholder=False, imagePlaceholder=False, tit
         </div>"""
 
     base_styles = "bg-white shadow-lg rounded-lg p-6"
-    # If there's an image placeholder, card padding might need adjustment or image placeholder needs rounded-t-lg
-    card_content_class = "flex flex-col" if imagePlaceholder else "" # Adjust layout if image is on top
+    card_content_class = "flex flex-col" if imagePlaceholder else "" 
     combined_styles = f"{base_styles} {styles}".strip()
-
 
     return f"""
 const FeatureCard = () => {{
@@ -344,54 +316,63 @@ export default Testimonial;
 
 
 if __name__ == "__main__":
-    print("--- Button Template ---")
-    print(get_button_template())
-    print("\n--- Button Template (Custom) ---")
+    # This block is for direct testing of this module.
+    # It should use its own logging config if main.py's root logger isn't already set up.
+    if not logging.getLogger().hasHandlers() or logging.getLogger().level > logging.DEBUG:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    logger.info("--- Running react_tailwind_templates.py standalone examples (using module logger) ---")
+
+    logger.info("--- Button Template ---") # Changed from print
+    print(get_button_template()) # Keep print for actual template output
+    logger.info("\n--- Button Template (Custom) ---") # Changed from print
     print(get_button_template(text="Submit", custom_styles="bg-green-500 hover:bg-green-700"))
 
-    print("\n--- Card Template ---")
+    logger.info("\n--- Card Template ---") # Changed from print
     print(get_card_template())
-    print("\n--- Card Template (Custom) ---")
+    logger.info("\n--- Card Template (Custom) ---") # Changed from print
     print(get_card_template(title="My Custom Card", content="This is custom content.", custom_styles="border-2 border-blue-500"))
 
-    print("\n--- Login Form Template ---")
+    logger.info("\n--- Login Form Template ---") # Changed from print
     print(get_login_form_template(custom_styles="bg-gray-100"))
     
+    logger.info("\n--- Login Form Template (Dark Mode Attempt) ---") # Changed from print
     dark_login_form = get_login_form_template(custom_styles="bg-gray-700 text-gray-200")
-    print("\n--- Login Form Template (Dark Mode Attempt) ---")
     print(dark_login_form)
 
-    print("\n--- Navbar Template (Default) ---")
+    logger.info("\n--- Navbar Template (Default) ---") # Changed from print
     print(get_navbar_template())
-    print("\n--- Navbar Template (With CTA) ---")
+    logger.info("\n--- Navbar Template (With CTA) ---") # Changed from print
     print(get_navbar_template(logoText="MyApp", ctaText="Sign Up", styles="bg-blue-100"))
 
-    print("\n--- Footer Template (Default) ---")
+    logger.info("\n--- Footer Template (Default) ---") # Changed from print
     print(get_footer_template())
-    print("\n--- Footer Template (With Link Columns) ---")
+    logger.info("\n--- Footer Template (With Link Columns) ---") # Changed from print
     footer_link_cols = [
         {'title': 'Products', 'links': [{'text': 'Product A', 'href': '#'}, {'text': 'Product B', 'href': '#'}]},
         {'title': 'Company', 'links': [{'text': 'About Us', 'href': '#'}, {'text': 'Careers', 'href': '#'}]}
     ]
     print(get_footer_template(linkColumns=footer_link_cols, styles="bg-gray-800 text-white"))
 
-    print("\n--- Hero Template (Default) ---")
+    logger.info("\n--- Hero Template (Default) ---") # Changed from print
     print(get_hero_template())
-    print("\n--- Hero Template (With Secondary CTA & BG Placeholder) ---")
+    logger.info("\n--- Hero Template (With Secondary CTA & BG Placeholder) ---") # Changed from print
     print(get_hero_template(heading="Welcome to Awesome", subheading="Discover the future with us.", 
                             primaryCtaText="Learn More", secondaryCtaText="View Pricing", 
                             backgroundImagePlaceholder=True, styles="text-indigo-600"))
 
-    print("\n--- Feature Card Template (Icon) ---")
+    logger.info("\n--- Feature Card Template (Icon) ---") # Changed from print
     print(get_feature_card_template(iconPlaceholder=True, title="Fast Performance", learnMoreLink="#"))
-    print("\n--- Feature Card Template (Image & Custom Style) ---")
+    logger.info("\n--- Feature Card Template (Image & Custom Style) ---") # Changed from print
     print(get_feature_card_template(imagePlaceholder=True, title="Beautiful Design", 
                                     description="Modern and intuitive user interface.", 
                                     styles="border-2 border-green-500"))
     
-    print("\n--- Testimonial Template (Default) ---")
+    logger.info("\n--- Testimonial Template (Default) ---") # Changed from print
     print(get_testimonial_template())
-    print("\n--- Testimonial Template (With Image & Custom Style) ---")
+    logger.info("\n--- Testimonial Template (With Image & Custom Style) ---") # Changed from print
     print(get_testimonial_template(quote="Absolutely changed the way we work!", authorName="Sam B.", 
                                    authorTitle="Lead Developer, TechCorp", imagePlaceholder=True, 
                                    styles="bg-purple-100"))
+    
+    logger.info("--- End of react_tailwind_templates.py standalone examples ---")

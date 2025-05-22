@@ -39,9 +39,9 @@ The agent produces the following outputs, defined in `schema.py` as `AgentOutput
 -   `trend_tags` (List[str]): A list of identified UI/UX trends.
 -   `inspiration_summary` (str): A summary string derived from matched inspiration items.
 
-## Configuration (API Keys for Live Data)
+## Configuration
 
-This project can connect to external APIs (like Unsplash and Google Fonts) to fetch live inspiration data and font suggestions. To enable these features, you need to provide your own API keys using a `.env` file.
+This project uses a `.env` file to manage API keys for external services and other configurations like logging levels.
 
 1.  **Install `python-dotenv`**:
     This project uses the `python-dotenv` library to load environment variables from a `.env` file. If you are setting this project up manually and haven't installed dependencies, you might need to install it:
@@ -57,7 +57,10 @@ This project can connect to external APIs (like Unsplash and Google Fonts) to fe
     ```
 
 3.  **Edit your `.env` file**:
-    Open the newly created `.env` file with a text editor and add your API keys:
+    Open the newly created `.env` file with a text editor.
+
+    ### API Keys for Live Data (Optional)
+    Add your API keys if you want to enable live data fetching:
     ```env
     # Unsplash API Key (Client ID)
     # Obtain from your Unsplash developer dashboard: https://unsplash.com/developers
@@ -67,9 +70,18 @@ This project can connect to external APIs (like Unsplash and Google Fonts) to fe
     # Obtain from your Google Cloud Platform Console: https://console.cloud.google.com/apis/credentials
     GOOGLE_FONTS_API_KEY=YOUR_ACTUAL_GOOGLE_FONTS_KEY_HERE
     ```
-    Replace `YOUR_ACTUAL_..._KEY_HERE` with your real keys.
+    Replace `YOUR_ACTUAL_..._KEY_HERE` with your real keys. If keys are not provided or are invalid, the agent will gracefully fall back to using local mock data.
 
-The application, via `config.py`, will load these keys from the `.env` file at runtime. If keys are not provided or are invalid, the agent will gracefully fall back to using local mock data for inspiration and font suggestions.
+    ### Logging Configuration (Optional)
+    You can also set the `LOG_LEVEL` in your `.env` file. This controls the verbosity of the application's logs.
+    Supported levels are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. The default is `INFO` if not set.
+
+    Example in `.env`:
+    ```env
+    LOG_LEVEL=DEBUG
+    ```
+
+The application, via `config.py`, will load these settings from the `.env` file at runtime.
 
 **Important:** Remember to keep your `.env` file private and **do not commit it to version control**. The `.gitignore` file in this project is already configured to ignore `.env` files.
 
@@ -78,7 +90,7 @@ The application, via `config.py`, will load these keys from the `.env` file at r
 ## How to Run
 
 1.  Ensure you have Python installed.
-2.  (Optional but recommended for live data) Configure API keys by creating and filling a `.env` file as described in the "Configuration" section.
+2.  (Optional but recommended for live data and custom logging) Configure your `.env` file as described in the "Configuration" section.
 3.  Navigate to the `frontend-trend-builder` root directory.
 4.  The primary way to interact with the agent is by calling the `run_agent` function from `frontend_trend_builder.main`.
 
@@ -98,19 +110,20 @@ inputs = AgentInput(
 output = run_agent(inputs)
 
 # The run_agent function logs its progress and the final output.
+# To see more detailed logs (like DEBUG), set LOG_LEVEL=DEBUG in your .env file.
 # You can also inspect the 'output' dictionary:
-print("\n--- Generated Frontend Code (Snippet) ---")
-print(output['frontend_code'][:500] + "...") 
+# print("\n--- Generated Frontend Code (Snippet) ---")
+# print(output['frontend_code'][:500] + "...") 
 
-print("\n--- Suggested Assets ---")
-for asset in output['asset_suggestions']:
-    print(f"- {asset.get('name')} (Type: {asset.get('type')}, Source: {asset.get('source', 'mock_data')})")
+# print("\n--- Suggested Assets ---")
+# for asset in output['asset_suggestions']:
+#     print(f"- {asset.get('name')} (Type: {asset.get('type')}, Source: {asset.get('source', 'mock_data')})")
 
-print("\n--- Trend Tags ---")
-print(output['trend_tags'])
+# print("\n--- Trend Tags ---")
+# print(output['trend_tags'])
 
-print("\n--- Inspiration Summary ---")
-print(output['inspiration_summary'])
+# print("\n--- Inspiration Summary ---")
+# print(output['inspiration_summary'])
 
 # To run the default example in main.py (which also uses run_agent):
 # python frontend_trend_builder/main.py
@@ -129,7 +142,7 @@ print(output['inspiration_summary'])
 -   `frontend-trend-builder/`
     -   `actions/`: Contains Python scripts for individual agent capabilities.
         -   `code_templates/`: Contains React+Tailwind CSS component string templates.
-    -   `config.py`: Manages loading of API keys from the `.env` file.
+    -   `config.py`: Manages loading of API keys and other configurations from the `.env` file.
     -   `data/`: Contains JSON files for mock inspiration, trend definitions, and mock assets.
     -   `.env.example`: Example file for environment variable configuration.
     -   `.gitignore`: Specifies intentionally untracked files (like `.env`).

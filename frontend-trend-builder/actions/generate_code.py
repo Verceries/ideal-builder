@@ -1,6 +1,10 @@
 from typing import List, Dict, Callable, Any
+import logging # Added
 # Import all templates from react_tailwind_templates
 from .code_templates import react_tailwind_templates 
+
+# Get a logger instance for this module
+logger = logging.getLogger(__name__) # Added
 
 # Component keyword mapping
 # Maps keywords (lowercase) to template functions and their default display names for logging/selection.
@@ -42,6 +46,9 @@ def apply_trend_styles(
     color_mode: str, 
     component_type: str = "Unknown" 
 ) -> str:
+    # This function does not have print statements, so no logging changes needed here.
+    # Logging for style application would be too verbose for typical use,
+    # but could be added at DEBUG level if needed for deep debugging.
     additional_styles = []
     
     # 1. Color Mode Defaults
@@ -73,20 +80,16 @@ def apply_trend_styles(
             if not any(s.startswith("bg-") and "opacity" not in s for s in additional_styles):
                  additional_styles.append("bg-white")
     
-    # 2. Trend-specific styles (alphabetical for easier maintenance, but order of application matters for overrides)
-    # Consider interaction: e.g. cyberpunk might override modern_ui rounding.
-
+    # 2. Trend-specific styles
     if "cyberpunk" in trend_tags:
-        additional_styles = [s for s in additional_styles if not s.startswith("rounded-")] # remove previous rounding
+        additional_styles = [s for s in additional_styles if not s.startswith("rounded-")] 
         additional_styles.append("rounded-none")
-        additional_styles.append("text-lime-400") # Neon-like text
+        additional_styles.append("text-lime-400") 
         if color_mode != "dark":
-            additional_styles = [s for s in additional_styles if not s.startswith("bg-")] # remove previous bg
-            additional_styles.append("bg-black text-white") # Ensure contrast
-        # Optionally, add bright border if component makes sense for it
+            additional_styles = [s for s in additional_styles if not s.startswith("bg-")] 
+            additional_styles.append("bg-black text-white") 
         if component_type in ["Card", "Feature Card", "Hero Section", "Navbar"]:
              additional_styles.append("border-2 border-pink-500")
-
 
     if "glassmorphism" in trend_tags:
         temp_styles = [s for s in additional_styles if not (s.startswith("bg-gray") or (s.startswith("bg-white") and "/10" not in s and "/20" not in s and "/30" not in s))]
@@ -104,10 +107,10 @@ def apply_trend_styles(
             base_bg = "bg-white/20" if color_mode == "light" else "bg-gray-700/20"
             additional_styles.append(f"{base_bg} border-gray-200") 
         if color_mode == "dark": 
-            if "text-white" not in additional_styles and "text-lime-400" not in additional_styles : additional_styles.append("text-white") # Avoid double text color if cyberpunk
+            if "text-white" not in additional_styles and "text-lime-400" not in additional_styles : additional_styles.append("text-white")
     
     if "handwritten_fonts" in trend_tags:
-        additional_styles = [s for s in additional_styles if not s.startswith("font-")] # remove other font families
+        additional_styles = [s for s in additional_styles if not s.startswith("font-")] 
         additional_styles.append("font-['cursive']")
 
     if "luxury_aesthetic" in trend_tags:
@@ -116,17 +119,15 @@ def apply_trend_styles(
             additional_styles.append("font-serif")
         if color_mode == "light":
             if component_type in ["Card", "Feature Card", "Navbar", "Hero Section"]:
-                additional_styles.append("border-yellow-400") # Gold-like border
-            additional_styles.append("text-yellow-700") # Gold-like text accents
-        else: # Dark mode luxury
-            additional_styles.append("text-yellow-300") # Lighter gold for dark bg
+                additional_styles.append("border-yellow-400") 
+            additional_styles.append("text-yellow-700") 
+        else: 
+            additional_styles.append("text-yellow-300") 
             if component_type in ["Card", "Feature Card", "Navbar", "Hero Section"]:
                 additional_styles.append("border-yellow-500")
-        # Minimalism should override shadows if present
         if "minimalism" in trend_tags:
             additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
             additional_styles.append("shadow-none")
-
 
     if "minimalism" in trend_tags:
         additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
@@ -144,7 +145,7 @@ def apply_trend_styles(
             if "border-gray-200" not in additional_styles: additional_styles.append("border-gray-200")
     
     if "modern_ui" in trend_tags:
-        if "cyberpunk" not in trend_tags: # Cyberpunk uses rounded-none
+        if "cyberpunk" not in trend_tags: 
             additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
             additional_styles.append("rounded-lg") 
         if "glassmorphism" not in trend_tags and "minimalism" not in trend_tags:
@@ -162,16 +163,14 @@ def apply_trend_styles(
                  additional_styles.append("text-gray-700")
     
     if "playful_aesthetic" in trend_tags:
-        if "cyberpunk" not in trend_tags: # Cyberpunk uses rounded-none
+        if "cyberpunk" not in trend_tags: 
             additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
-            additional_styles.append("rounded-xl") # More pronounced rounding
-        # Optional: brighter accent if no other color scheme is dominant
+            additional_styles.append("rounded-xl") 
         if "pastel_colors" not in trend_tags and color_mode != "dark" and component_type in ["Button", "Feature Card"]:
              additional_styles.append("border-2 border-sky-500")
 
-
     if "serif_fonts" in trend_tags:
-        if "handwritten_fonts" not in trend_tags: # Handwritten takes precedence
+        if "handwritten_fonts" not in trend_tags: 
              additional_styles = [s for s in additional_styles if not s.startswith("font-")]
              additional_styles.append("font-serif")
 
@@ -181,12 +180,11 @@ def apply_trend_styles(
             additional_styles.append("font-sans")
         if "modern_ui" not in trend_tags and "minimalism" not in trend_tags and "cyberpunk" not in trend_tags:
             additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
-            additional_styles.append("rounded-md") # Subtle rounding
+            additional_styles.append("rounded-md") 
             additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
-            additional_styles.append("shadow-sm") # Subtle shadow
-        if component_type == "Button": # Example for specific element styling
+            additional_styles.append("shadow-sm") 
+        if component_type == "Button": 
              additional_styles.append("bg-blue-600 text-white hover:bg-blue-700")
-
 
     base_style_list = base_styles.split()
     final_styles_list = base_style_list + additional_styles
@@ -203,16 +201,19 @@ def create_code(
     inspiration_summary: str, trend_tags: List[str], tech_stack: str,
     color_mode: str, layout_type: str
 ) -> str:
-    print(f"Generating code for tech_stack: {tech_stack}, layout: {layout_type}, color: {color_mode}")
-    print(f"Inspiration: '{inspiration_summary}', Trends: {trend_tags}")
+    # Replaced print with logger.info and logger.debug
+    logger.info(f"Generating code for tech_stack: {tech_stack}, layout: {layout_type}, color: {color_mode}")
+    logger.debug(f"Inspiration: '{inspiration_summary}', Trends: {trend_tags}")
 
     if tech_stack != "react-tailwind":
+        logger.warning(f"Code generation for tech_stack '{tech_stack}' is not yet implemented.")
         return f"Code generation for tech_stack '{tech_stack}' is not yet implemented."
 
     searchable_text = inspiration_summary.lower() + " " + " ".join(trend_tags).lower()
     generated_components: List[str] = []
 
     if layout_type == "full-page":
+        logger.info("Attempting to generate a full-page layout.")
         page_components_config = [
             {"name": "Navbar", "func": react_tailwind_templates.get_navbar_template, "params": {"logoText": "MyApp"}, "required": True},
         ]
@@ -252,13 +253,14 @@ def create_code(
                 else:
                     params["styles"] = final_styles
                 
-                print(f"Generating {comp_config['name']} (type: {component_name_for_style}) with params: {params}")
+                logger.debug(f"Generating page component '{comp_config['name']}' (type: {component_name_for_style}) with params: {params}")
                 component_code = template_func(**params)
             
             if component_code: generated_components.append(f"\n{/* --- {comp_config['name']} Start --- */}\n{component_code}\n{/* --- {comp_config['name']} End --- */}\n")
         return "\n".join(generated_components)
 
     elif layout_type == "component":
+        logger.info(f"Attempting to generate a single component based on keywords: '{searchable_text[:100]}...'")
         chosen_component_info = find_component_from_keywords(searchable_text)
         template_func: Callable = None
         template_params: Dict[str, Any] = {}
@@ -267,7 +269,7 @@ def create_code(
         if chosen_component_info:
             template_func = chosen_component_info["func"]
             component_name_for_style = chosen_component_info["name"]
-            print(f"Keyword match: Selected '{component_name_for_style}' component.")
+            logger.info(f"Keyword match: Selected '{component_name_for_style}' component.")
             if component_name_for_style == "Navbar": template_params = {"logoText": "MyApp"}
             elif component_name_for_style == "Footer": template_params = {}
             elif component_name_for_style == "Hero Section": template_params = {"heading": "Hero Title", "subheading": "Hero subtitle text."}
@@ -277,7 +279,7 @@ def create_code(
             elif component_name_for_style == "Button": template_params["text"] = "Dynamic Button"
             elif component_name_for_style == "Card": template_params = {"title": "Dynamic Card", "content": "Generated card content."}
         else: 
-            print("No specific new component keywords matched. Falling back to general components.")
+            logger.info("No specific new component keywords matched. Falling back to general components.")
             if "login" in searchable_text:
                 template_func, component_name_for_style = react_tailwind_templates.get_login_form_template, "Login Form"
             elif "card" in searchable_text: 
@@ -286,7 +288,7 @@ def create_code(
             else: 
                 template_func, component_name_for_style = react_tailwind_templates.get_button_template, "Button"
                 template_params = {"text": "Default Button"}
-            print(f"Fallback: Selected '{component_name_for_style}' component.")
+            logger.info(f"Fallback: Selected '{component_name_for_style}' component.")
 
         component_base_styles = "" 
         final_styles = apply_trend_styles(component_base_styles, trend_tags, color_mode, component_name_for_style)
@@ -299,16 +301,25 @@ def create_code(
             template_params["styles"] = final_styles
 
         if template_func:
-            print(f"Generating single component '{component_name_for_style}' with params: {template_params}")
+            logger.debug(f"Generating single component '{component_name_for_style}' with params: {template_params}")
             return template_func(**template_params)
-        else: return "Error: Could not determine a suitable template for React-Tailwind component."
+        else: 
+            logger.error("Could not determine a suitable template for React-Tailwind component.")
+            return "Error: Could not determine a suitable template for React-Tailwind component."
+    
+    logger.error(f"Invalid layout_type '{layout_type}' or other configuration issue.")
     return "Error: Invalid layout_type or other configuration issue."
 
 if __name__ == '__main__':
-    print("--- Example Code Generation (Enhanced with More Core Trend Styles) ---")
+    # This block is for direct testing of this module.
+    # It should use its own logging config if main.py's root logger isn't already set up.
+    if not logging.getLogger().hasHandlers() or logging.getLogger().level > logging.DEBUG:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    logger.info("--- Running generate_code.py standalone examples (using module logger) ---") # Changed from print
 
     # Test 1: Cyberpunk Hero Section
-    print("\n--- Test 1: Cyberpunk Hero Section (Dark) ---")
+    print("\n--- Test 1: Cyberpunk Hero Section (Dark) ---") # Keep print for CLI output
     inspiration_cyber_hero = "A cyberpunk hero banner for a tech noir game website."
     trends_cyber_hero = ["cyberpunk", "dark_mode", "hero"]
     code_cyber_hero = create_code(inspiration_cyber_hero, trends_cyber_hero, "react-tailwind", "dark", "component")
@@ -316,9 +327,9 @@ if __name__ == '__main__':
     assert "HeroSection" in code_cyber_hero
     assert "text-lime-400" in code_cyber_hero 
     assert "rounded-none" in code_cyber_hero
-    assert "border-pink-500" in code_cyber_hero # Optional border check
+    assert "border-pink-500" in code_cyber_hero 
 
-    # Test 2: Playful Feature Card with Handwritten Fonts
+    # ... (other print statements in if __name__ == '__main__' block are kept for CLI testing) ...
     print("\n--- Test 2: Playful Feature Card (Light, Handwritten) ---")
     inspiration_playful_feature = "A playful feature card with handwritten title."
     trends_playful_feature = ["playful_aesthetic", "handwritten_fonts", "light_mode", "feature"]
@@ -327,39 +338,36 @@ if __name__ == '__main__':
     assert "FeatureCard" in code_playful_feature
     assert "font-['cursive']" in code_playful_feature
     assert "rounded-xl" in code_playful_feature
-    assert "border-sky-500" in code_playful_feature # Optional playful border
+    assert "border-sky-500" in code_playful_feature 
 
-    # Test 3: Corporate Navbar with Luxury Accents (Light)
     print("\n--- Test 3: Corporate Navbar with Luxury Accents (Light) ---")
     inspiration_corp_luxury_nav = "A corporate navbar with a touch of luxury and serif font."
     trends_corp_luxury_nav = ["corporate_aesthetic", "luxury_aesthetic", "serif_fonts", "light_mode", "navbar"]
     code_corp_luxury_nav = create_code(inspiration_corp_luxury_nav, trends_corp_luxury_nav, "react-tailwind", "light", "component")
     print(f"Generated Corporate Luxury Navbar Code (first 300 chars):\n{code_corp_luxury_nav[:300]}...")
     assert "Navbar" in code_corp_luxury_nav
-    assert "font-serif" in code_corp_luxury_nav # Luxury implies serif if not handwritten
-    assert "border-yellow-400" in code_corp_luxury_nav # Luxury accent
-    assert "rounded-md" in code_corp_luxury_nav or "rounded-lg" in code_corp_luxury_nav # Corporate or Modern UI rounding
+    assert "font-serif" in code_corp_luxury_nav 
+    assert "border-yellow-400" in code_corp_luxury_nav 
+    assert "rounded-md" in code_corp_luxury_nav or "rounded-lg" in code_corp_luxury_nav 
 
-    # Test 4: Full Page with Cyberpunk theme (dark assumed by cyberpunk)
     print("\n--- Test 4: Full Page Cyberpunk Theme ---")
     inspiration_full_cyber = "A full website with a cyberpunk theme, including a hero section."
-    trends_full_cyber = ["cyberpunk", "hero"] # dark_mode is implied by cyberpunk styling logic
-    code_full_cyber = create_code(inspiration_full_cyber, trends_full_cyber, "react-tailwind", "dark", "full-page") # Explicitly dark for consistency
+    trends_full_cyber = ["cyberpunk", "hero"] 
+    code_full_cyber = create_code(inspiration_full_cyber, trends_full_cyber, "react-tailwind", "dark", "full-page") 
     print(f"Generated Full Cyberpunk Page Code (first 400 chars):\n{code_full_cyber[:400]}...")
     assert "Navbar" in code_full_cyber and "HeroSection" in code_full_cyber and "Footer" in code_full_cyber
     assert "text-lime-400" in code_full_cyber
     assert "bg-black" in code_full_cyber or "bg-gray-900" in code_full_cyber
     assert "rounded-none" in code_full_cyber
     
-    # Test 5: Button with Corporate and Playful (Playful should dominate rounding)
     print("\n--- Test 5: Button - Corporate & Playful Mix ---")
     insp_corp_play_button = "A button for a fun corporate event."
     trends_corp_play_button = ["corporate_aesthetic", "playful_aesthetic", "button", "light_mode"]
     code_corp_play_button = create_code(insp_corp_play_button, trends_corp_play_button, "react-tailwind", "light", "component")
     print(f"Generated Corp Playful Button (first 300 chars):\n{code_corp_play_button[:300]}...")
     assert "MyButton" in code_corp_play_button
-    assert "rounded-xl" in code_corp_play_button # Playful rounding should win
-    assert "font-sans" in code_corp_play_button # Corporate font
-    assert "bg-blue-600" not in code_corp_play_button # Playful might override corporate button bg
+    assert "rounded-xl" in code_corp_play_button 
+    assert "font-sans" in code_corp_play_button 
+    assert "bg-blue-600" not in code_corp_play_button 
 
-    print("\n--- All generate_code examples with new core trend styles run ---")
+    logger.info("--- End of generate_code.py standalone examples ---") # Changed from print
