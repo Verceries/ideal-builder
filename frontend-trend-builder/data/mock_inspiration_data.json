@@ -1,0 +1,58 @@
+[
+  {
+    "id": "mock1",
+    "title": "Glassmorphic Crypto Wallet Login",
+    "description": "A sleek login form for a crypto wallet app using glassmorphism and dark mode.",
+    "tags": ["glassmorphism", "crypto", "login", "dark_mode", "finance"],
+    "source": "Dribbble_mock",
+    "image_url_mock": "http://example.com/mock_image_glass_crypto.png"
+  },
+  {
+    "id": "mock2",
+    "title": "Minimalist E-commerce Homepage",
+    "description": "A clean and minimalist homepage design for an online store focusing on user experience.",
+    "tags": ["minimal", "ecommerce", "homepage", "light_mode", "ux"],
+    "source": "Behance_mock",
+    "image_url_mock": "http://example.com/mock_image_minimal_ecom.png"
+  },
+  {
+    "id": "mock3",
+    "title": "Pastel Colors Social Media Dashboard",
+    "description": "A vibrant dashboard for a social media analytics platform using pastel color palette.",
+    "tags": ["pastel", "dashboard", "social_media", "analytics", "data_visualization"],
+    "source": "Internal_UX_Team_mock",
+    "image_url_mock": "http://example.com/mock_image_pastel_dashboard.png"
+  },
+  {
+    "id": "mock4",
+    "title": "Dark Mode Music Player UI",
+    "description": "A user interface for a music player application with a focus on dark mode aesthetics.",
+    "tags": ["dark_mode", "music_player", "ui_kit", "mobile_app"],
+    "source": "Dribbble_mock",
+    "image_url_mock": "http://example.com/mock_image_dark_music.png"
+  },
+  {
+    "id": "mock5",
+    "title": "Abstract Backgrounds for Landing Pages",
+    "description": "A collection of abstract geometric backgrounds suitable for modern landing pages.",
+    "tags": ["abstract", "background", "landing_page", "geometric", "modern"],
+    "source": "Pinterest_mock",
+    "image_url_mock": "http://example.com/mock_image_abstract_bg.png"
+  },
+  {
+    "id": "mock6",
+    "title": "Crypto Trading Dashboard Interface",
+    "description": "A detailed interface for a cryptocurrency trading platform, showing charts and data. Features glassmorphism elements.",
+    "tags": ["crypto", "dashboard", "trading", "finance", "data_visualization", "glassmorphism"],
+    "source": "Behance_mock",
+    "image_url_mock": "http://example.com/mock_image_crypto_dashboard.png"
+  },
+  {
+    "id": "mock7",
+    "title": "Minimal Portfolio Website with Pastel Accents",
+    "description": "A clean and minimal portfolio website design for creatives, using subtle pastel color accents.",
+    "tags": ["minimal", "portfolio", "pastel", "web_design", "creative"],
+    "source": "Awwwards_mock",
+    "image_url_mock": "http://example.com/mock_image_minimal_pastel_portfolio.png"
+  }
+]

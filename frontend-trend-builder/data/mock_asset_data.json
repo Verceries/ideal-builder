@@ -1,0 +1,74 @@
+[
+  {
+    "type": "icon",
+    "name": "Feather Icons - User",
+    "url_mock": "http://example.com/feather_user.svg",
+    "tags": ["minimal", "user", "profile", "login", "modern_ui"]
+  },
+  {
+    "type": "icon",
+    "name": "Phosphor Icons - ChartLineUp",
+    "url_mock": "http://example.com/phosphor_chart.svg",
+    "tags": ["data_visualization", "dashboard", "analytics", "modern_ui"]
+  },
+  {
+    "type": "icon",
+    "name": "Heroicons - Sparkles",
+    "url_mock": "http://example.com/hero_sparkles.svg",
+    "tags": ["modern_ui", "feature", "highlight", "glassmorphism"]
+  },
+  {
+    "type": "font",
+    "name": "Roboto",
+    "url_mock": "http://fonts.example.com/roboto",
+    "tags": ["modern_ui", "sans_serif_fonts", "dashboard", "minimalism", "accessibility"]
+  },
+  {
+    "type": "font",
+    "name": "Playfair Display",
+    "url_mock": "http://fonts.example.com/playfair_display",
+    "tags": ["serif_fonts", "elegant", "portfolio", "bold_typography"]
+  },
+  {
+    "type": "font",
+    "name": "JetBrains Mono",
+    "url_mock": "http://fonts.example.com/jetbrains_mono",
+    "tags": ["modern_ui", "developer", "code", "dashboard", "dark_mode"]
+  },
+  {
+    "type": "image",
+    "name": "Abstract Geometric Background",
+    "url_mock": "http://images.example.com/abstract_geometric_bg.jpg",
+    "tags": ["glassmorphism", "background", "dark_mode", "modern_ui", "geometric_patterns"]
+  },
+  {
+    "type": "image",
+    "name": "Pastel Wave Pattern",
+    "url_mock": "http://images.example.com/pastel_wave.png",
+    "tags": ["pastel_colors", "background", "organic_design", "light_mode"]
+  },
+  {
+    "type": "image",
+    "name": "Minimalist Desk Setup",
+    "url_mock": "http://images.example.com/minimal_desk.jpg",
+    "tags": ["minimalism", "background", "hero_image", "light_mode", "portfolio"]
+  },
+  {
+    "type": "image",
+    "name": "Retro Gaming Console",
+    "url_mock": "http://images.example.com/retro_console.png",
+    "tags": ["retro_style", "gaming", "hero_image", "dark_mode"]
+  },
+  {
+    "type": "icon",
+    "name": "Material Icons - Dark Mode",
+    "url_mock": "http://example.com/material_dark_mode.svg",
+    "tags": ["dark_mode", "icon", "toggle", "settings"]
+  },
+  {
+    "type": "icon",
+    "name": "Bootstrap Icons - Credit Card",
+    "url_mock": "http://example.com/bootstrap_credit_card.svg",
+    "tags": ["finance", "payment", "ecommerce", "minimalism", "modern_ui"]
+  }
+]
