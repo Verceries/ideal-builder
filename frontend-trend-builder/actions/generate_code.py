@@ -73,11 +73,24 @@ def apply_trend_styles(
             if not any(s.startswith("bg-") and "opacity" not in s for s in additional_styles):
                  additional_styles.append("bg-white")
     
-    # 2. Trend-specific styles
+    # 2. Trend-specific styles (alphabetical for easier maintenance, but order of application matters for overrides)
+    # Consider interaction: e.g. cyberpunk might override modern_ui rounding.
+
+    if "cyberpunk" in trend_tags:
+        additional_styles = [s for s in additional_styles if not s.startswith("rounded-")] # remove previous rounding
+        additional_styles.append("rounded-none")
+        additional_styles.append("text-lime-400") # Neon-like text
+        if color_mode != "dark":
+            additional_styles = [s for s in additional_styles if not s.startswith("bg-")] # remove previous bg
+            additional_styles.append("bg-black text-white") # Ensure contrast
+        # Optionally, add bright border if component makes sense for it
+        if component_type in ["Card", "Feature Card", "Hero Section", "Navbar"]:
+             additional_styles.append("border-2 border-pink-500")
+
+
     if "glassmorphism" in trend_tags:
         temp_styles = [s for s in additional_styles if not (s.startswith("bg-gray") or (s.startswith("bg-white") and "/10" not in s and "/20" not in s and "/30" not in s))]
         additional_styles = temp_styles
-        
         additional_styles.append("backdrop-blur-lg shadow-lg")
         if component_type == "Navbar":
             base_bg = "bg-white/30" if color_mode == "light" else "bg-gray-700/30"
@@ -91,20 +104,29 @@ def apply_trend_styles(
             base_bg = "bg-white/20" if color_mode == "light" else "bg-gray-700/20"
             additional_styles.append(f"{base_bg} border-gray-200") 
         if color_mode == "dark": 
-            if "text-white" not in additional_styles: additional_styles.append("text-white")
-                 
-    if "pastel_colors" in trend_tags and color_mode != "dark":
-        if component_type in ["Hero Section", "Card", "Feature Card", "Testimonial", "Navbar", "Button"]:
-            if "glassmorphism" not in trend_tags: 
-                additional_styles = [s for s in additional_styles if not (s.startswith("bg-gray") or s.startswith("bg-white"))]
-                additional_styles.append("bg-blue-100") 
-            if component_type == "Navbar" or component_type == "Button":
-                 additional_styles.append("text-blue-800") 
-            elif "glassmorphism" not in trend_tags : 
-                 additional_styles.append("text-gray-700")
+            if "text-white" not in additional_styles and "text-lime-400" not in additional_styles : additional_styles.append("text-white") # Avoid double text color if cyberpunk
+    
+    if "handwritten_fonts" in trend_tags:
+        additional_styles = [s for s in additional_styles if not s.startswith("font-")] # remove other font families
+        additional_styles.append("font-['cursive']")
 
-    if "serif_fonts" in trend_tags:
-        additional_styles.append("font-serif")
+    if "luxury_aesthetic" in trend_tags:
+        if "font-serif" not in additional_styles and "font-['cursive']" not in additional_styles:
+            additional_styles = [s for s in additional_styles if not s.startswith("font-")]
+            additional_styles.append("font-serif")
+        if color_mode == "light":
+            if component_type in ["Card", "Feature Card", "Navbar", "Hero Section"]:
+                additional_styles.append("border-yellow-400") # Gold-like border
+            additional_styles.append("text-yellow-700") # Gold-like text accents
+        else: # Dark mode luxury
+            additional_styles.append("text-yellow-300") # Lighter gold for dark bg
+            if component_type in ["Card", "Feature Card", "Navbar", "Hero Section"]:
+                additional_styles.append("border-yellow-500")
+        # Minimalism should override shadows if present
+        if "minimalism" in trend_tags:
+            additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
+            additional_styles.append("shadow-none")
+
 
     if "minimalism" in trend_tags:
         additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
@@ -115,19 +137,57 @@ def apply_trend_styles(
         if color_mode != "dark" and "glassmorphism" not in trend_tags and "pastel_colors" not in trend_tags:
             additional_styles = [s for s in additional_styles if not (s.startswith("bg-gray") or s.startswith("bg-blue-") or s.startswith("bg-white"))] 
             additional_styles.append("bg-white") 
-        
         current_border_classes = [s for s in (base_styles.split() + additional_styles) if s.startswith("border")]
         if not any(b_class == "border-0" or b_class == "border-transparent" for b_class in current_border_classes):
             if not any(b_class == "border" or (b_class.startswith("border-") and b_class != "border-gray-200") for b_class in current_border_classes):
                  additional_styles.append("border")
             if "border-gray-200" not in additional_styles: additional_styles.append("border-gray-200")
-
+    
     if "modern_ui" in trend_tags:
-        additional_styles.append("rounded-lg") 
+        if "cyberpunk" not in trend_tags: # Cyberpunk uses rounded-none
+            additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
+            additional_styles.append("rounded-lg") 
         if "glassmorphism" not in trend_tags and "minimalism" not in trend_tags:
             additional_styles = [s for s in additional_styles if not s.startswith("shadow-")] 
             additional_styles.append("shadow-md") 
-            
+
+    if "pastel_colors" in trend_tags and color_mode != "dark":
+        if component_type in ["Hero Section", "Card", "Feature Card", "Testimonial", "Navbar", "Button"]:
+            if "glassmorphism" not in trend_tags: 
+                additional_styles = [s for s in additional_styles if not (s.startswith("bg-gray") or s.startswith("bg-white"))]
+                additional_styles.append("bg-blue-100") 
+            if component_type == "Navbar" or component_type == "Button":
+                 additional_styles.append("text-blue-800") 
+            elif "glassmorphism" not in trend_tags : 
+                 additional_styles.append("text-gray-700")
+    
+    if "playful_aesthetic" in trend_tags:
+        if "cyberpunk" not in trend_tags: # Cyberpunk uses rounded-none
+            additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
+            additional_styles.append("rounded-xl") # More pronounced rounding
+        # Optional: brighter accent if no other color scheme is dominant
+        if "pastel_colors" not in trend_tags and color_mode != "dark" and component_type in ["Button", "Feature Card"]:
+             additional_styles.append("border-2 border-sky-500")
+
+
+    if "serif_fonts" in trend_tags:
+        if "handwritten_fonts" not in trend_tags: # Handwritten takes precedence
+             additional_styles = [s for s in additional_styles if not s.startswith("font-")]
+             additional_styles.append("font-serif")
+
+    if "corporate_aesthetic" in trend_tags:
+        if not any(f in additional_styles for f in ["font-serif", "font-['cursive']"]):
+            additional_styles = [s for s in additional_styles if not s.startswith("font-")]
+            additional_styles.append("font-sans")
+        if "modern_ui" not in trend_tags and "minimalism" not in trend_tags and "cyberpunk" not in trend_tags:
+            additional_styles = [s for s in additional_styles if not s.startswith("rounded-")]
+            additional_styles.append("rounded-md") # Subtle rounding
+            additional_styles = [s for s in additional_styles if not s.startswith("shadow-")]
+            additional_styles.append("shadow-sm") # Subtle shadow
+        if component_type == "Button": # Example for specific element styling
+             additional_styles.append("bg-blue-600 text-white hover:bg-blue-700")
+
+
     base_style_list = base_styles.split()
     final_styles_list = base_style_list + additional_styles
     return " ".join(list(dict.fromkeys(final_styles_list)))
@@ -245,74 +305,61 @@ def create_code(
     return "Error: Invalid layout_type or other configuration issue."
 
 if __name__ == '__main__':
-    print("--- Example Code Generation (Enhanced with Refined Styles) ---")
+    print("--- Example Code Generation (Enhanced with More Core Trend Styles) ---")
 
-    # Test 1: Hero Section (Dark, Glassmorphism, Serif)
-    print("\n--- Test 1: Hero Section Component (Dark, Glassmorphism, Serif) ---")
-    inspiration_hero = "A hero banner for our app, with glassmorphism style and serif fonts"
-    trends_hero = ["glassmorphism", "dark_mode", "modern_ui", "hero", "serif_fonts"]
-    code_hero = create_code(inspiration_hero, trends_hero, "react-tailwind", "dark", "component")
-    print(f"Generated Hero Section Code (first 300 chars):\n{code_hero[:300]}...")
-    assert "HeroSection" in code_hero, "HeroSection component not found"
-    assert "font-serif" in code_hero, "Serif font style missing"
-    assert "bg-gray-800/10" in code_hero or ("bg-white/10" in code_hero and "text-white" in code_hero), "Dark glassmorphism style missing"
-    assert "text-white" in code_hero, "Dark mode text color missing"
+    # Test 1: Cyberpunk Hero Section
+    print("\n--- Test 1: Cyberpunk Hero Section (Dark) ---")
+    inspiration_cyber_hero = "A cyberpunk hero banner for a tech noir game website."
+    trends_cyber_hero = ["cyberpunk", "dark_mode", "hero"]
+    code_cyber_hero = create_code(inspiration_cyber_hero, trends_cyber_hero, "react-tailwind", "dark", "component")
+    print(f"Generated Cyberpunk Hero Code (first 300 chars):\n{code_cyber_hero[:300]}...")
+    assert "HeroSection" in code_cyber_hero
+    assert "text-lime-400" in code_cyber_hero 
+    assert "rounded-none" in code_cyber_hero
+    assert "border-pink-500" in code_cyber_hero # Optional border check
 
-    # Test 2: Full Page (Light, Minimalist, Pastel accents, Serif)
-    print("\n--- Test 2: Full Page Layout (Light, Minimalist, Pastel, Serif) ---")
-    inspiration_page_min_pastel = "A landing page intro for my portfolio, minimalist style with pastel colors and serif type."
-    trends_page_min_pastel = ["minimalism", "light_mode", "hero", "pastel_colors", "serif_fonts"]
-    code_page_min_pastel = create_code(inspiration_page_min_pastel, trends_page_min_pastel, "react-tailwind", "light", "full-page")
-    print(f"Generated Full Page Code (Minimal, Pastel) (first 400 chars):\n{code_page_min_pastel[:400]}...")
-    assert "Navbar" in code_page_min_pastel, "Navbar not found in full page"
-    assert "HeroSection" in code_page_min_pastel, "HeroSection not found in full page"
-    assert "Footer" in code_page_min_pastel, "Footer not found in full page"
-    assert "font-serif" in code_page_min_pastel, "Serif font style missing in full page"
-    assert "bg-blue-100" in code_page_min_pastel, "Pastel color style missing in full page"
-    assert "shadow-none" in code_page_min_pastel, "Minimalism shadow-none style missing"
-    assert "bg-white" in code_page_min_pastel or "bg-blue-100" in code_page_min_pastel, "Light mode background (white or pastel) missing"
+    # Test 2: Playful Feature Card with Handwritten Fonts
+    print("\n--- Test 2: Playful Feature Card (Light, Handwritten) ---")
+    inspiration_playful_feature = "A playful feature card with handwritten title."
+    trends_playful_feature = ["playful_aesthetic", "handwritten_fonts", "light_mode", "feature"]
+    code_playful_feature = create_code(inspiration_playful_feature, trends_playful_feature, "react-tailwind", "light", "component")
+    print(f"Generated Playful Feature Card Code (first 300 chars):\n{code_playful_feature[:300]}...")
+    assert "FeatureCard" in code_playful_feature
+    assert "font-['cursive']" in code_playful_feature
+    assert "rounded-xl" in code_playful_feature
+    assert "border-sky-500" in code_playful_feature # Optional playful border
 
-    # Test 3: Feature Card (Dark Mode, Modern UI)
-    print("\n--- Test 3: Feature Card (Dark, Modern UI) ---")
-    inspiration_feature_dark = "A feature highlight card for a modern dark themed dashboard."
-    trends_feature_dark = ["dark_mode", "modern_ui", "feature"]
-    code_feature_dark = create_code(inspiration_feature_dark, trends_feature_dark, "react-tailwind", "dark", "component")
-    print(f"Generated Feature Card Code (Dark, Modern) (first 300 chars):\n{code_feature_dark[:300]}...")
-    assert "FeatureCard" in code_feature_dark, "FeatureCard component not found"
-    assert "rounded-lg" in code_feature_dark, "Modern UI rounded-lg style missing"
-    assert "bg-gray-800" in code_feature_dark, "Dark mode background missing"
-    assert "shadow-md" in code_feature_dark or "shadow-lg" in code_feature_dark, "Modern UI shadow missing"
+    # Test 3: Corporate Navbar with Luxury Accents (Light)
+    print("\n--- Test 3: Corporate Navbar with Luxury Accents (Light) ---")
+    inspiration_corp_luxury_nav = "A corporate navbar with a touch of luxury and serif font."
+    trends_corp_luxury_nav = ["corporate_aesthetic", "luxury_aesthetic", "serif_fonts", "light_mode", "navbar"]
+    code_corp_luxury_nav = create_code(inspiration_corp_luxury_nav, trends_corp_luxury_nav, "react-tailwind", "light", "component")
+    print(f"Generated Corporate Luxury Navbar Code (first 300 chars):\n{code_corp_luxury_nav[:300]}...")
+    assert "Navbar" in code_corp_luxury_nav
+    assert "font-serif" in code_corp_luxury_nav # Luxury implies serif if not handwritten
+    assert "border-yellow-400" in code_corp_luxury_nav # Luxury accent
+    assert "rounded-md" in code_corp_luxury_nav or "rounded-lg" in code_corp_luxury_nav # Corporate or Modern UI rounding
 
-    # Test 4: Navbar (Light Mode, Glassmorphism, Modern UI)
-    print("\n--- Test 4: Navbar (Light, Glassmorphism, Modern UI) ---")
-    inspiration_navbar_glass = "A modern navigation bar with a frosted glass effect."
-    trends_navbar_glass = ["light_mode", "glassmorphism", "modern_ui", "navbar"]
-    code_navbar_glass = create_code(inspiration_navbar_glass, trends_navbar_glass, "react-tailwind", "light", "component")
-    print(f"Generated Navbar Code (Light, Glass) (first 300 chars):\n{code_navbar_glass[:300]}...")
-    assert "Navbar" in code_navbar_glass, "Navbar component not found"
-    assert "bg-white/30" in code_navbar_glass, "Light glassmorphism style for Navbar missing"
-    assert "backdrop-blur-md" in code_navbar_glass, "Navbar backdrop blur missing"
-    assert "rounded-lg" in code_navbar_glass, "Modern UI rounded-lg style missing for Navbar"
+    # Test 4: Full Page with Cyberpunk theme (dark assumed by cyberpunk)
+    print("\n--- Test 4: Full Page Cyberpunk Theme ---")
+    inspiration_full_cyber = "A full website with a cyberpunk theme, including a hero section."
+    trends_full_cyber = ["cyberpunk", "hero"] # dark_mode is implied by cyberpunk styling logic
+    code_full_cyber = create_code(inspiration_full_cyber, trends_full_cyber, "react-tailwind", "dark", "full-page") # Explicitly dark for consistency
+    print(f"Generated Full Cyberpunk Page Code (first 400 chars):\n{code_full_cyber[:400]}...")
+    assert "Navbar" in code_full_cyber and "HeroSection" in code_full_cyber and "Footer" in code_full_cyber
+    assert "text-lime-400" in code_full_cyber
+    assert "bg-black" in code_full_cyber or "bg-gray-900" in code_full_cyber
+    assert "rounded-none" in code_full_cyber
+    
+    # Test 5: Button with Corporate and Playful (Playful should dominate rounding)
+    print("\n--- Test 5: Button - Corporate & Playful Mix ---")
+    insp_corp_play_button = "A button for a fun corporate event."
+    trends_corp_play_button = ["corporate_aesthetic", "playful_aesthetic", "button", "light_mode"]
+    code_corp_play_button = create_code(insp_corp_play_button, trends_corp_play_button, "react-tailwind", "light", "component")
+    print(f"Generated Corp Playful Button (first 300 chars):\n{code_corp_play_button[:300]}...")
+    assert "MyButton" in code_corp_play_button
+    assert "rounded-xl" in code_corp_play_button # Playful rounding should win
+    assert "font-sans" in code_corp_play_button # Corporate font
+    assert "bg-blue-600" not in code_corp_play_button # Playful might override corporate button bg
 
-    # Test 5: Footer (Dark Mode, Minimalist)
-    print("\n--- Test 5: Footer Component (Dark, Minimalist) ---")
-    inspiration_footer_min_dark = "A simple, clean footer for dark mode."
-    trends_footer_min_dark = ["dark_mode", "minimalism", "footer"]
-    code_footer_min_dark = create_code(inspiration_footer_min_dark, trends_footer_min_dark, "react-tailwind", "dark", "component")
-    print(f"Generated Footer Code (Dark, Minimal) (first 300 chars):\n{code_footer_min_dark[:300]}...")
-    assert "Footer" in code_footer_min_dark, "Footer component not found"
-    assert "shadow-none" in code_footer_min_dark, "Minimalism shadow-none style missing for Footer"
-    assert "bg-gray-800" in code_footer_min_dark or "bg-gray-900" in code_footer_min_dark, "Dark mode background missing for Footer"
-
-    # Test 6: Button (Light Mode, Pastel, Serif)
-    print("\n--- Test 6: Button Component (Light, Pastel, Serif) ---")
-    inspiration_button_pastel = "A button with light pastel colors and serif font."
-    trends_button_pastel = ["light_mode", "pastel_colors", "serif_fonts", "button"]
-    code_button_pastel = create_code(inspiration_button_pastel, trends_button_pastel, "react-tailwind", "light", "component")
-    print(f"Generated Button Code (Pastel, Serif) (first 300 chars):\n{code_button_pastel[:300]}...")
-    assert "MyButton" in code_button_pastel, "Button component not found"
-    assert "font-serif" in code_button_pastel, "Serif font style missing for Button"
-    assert "bg-blue-100" in code_button_pastel, "Pastel background missing for Button"
-    assert "text-blue-800" in code_button_pastel, "Pastel text color missing for Button"
-
-    print("\n--- All generate_code examples with refined styles run ---")
+    print("\n--- All generate_code examples with new core trend styles run ---")

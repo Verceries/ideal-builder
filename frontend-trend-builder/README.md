@@ -12,11 +12,11 @@ The Frontend Trend Builder is an autonomous agent designed to streamline the ini
     -   **Live (Conceptual):** Attempts to fetch inspiration images from Unsplash via its API if an `UNSPLASH_ACCESS_KEY` is configured.
     -   **Experimental Scraping:** If the Unsplash API call fails or is not configured, it attempts a basic HTML scrape of Unsplash search results.
     -   **Fallback:** If live/scraped data is unavailable, it filters local mock inspiration data based on keywords in a user-provided prompt.
--   **Analyzes Trends:** Identifies relevant UI/UX trends (e.g., "glassmorphism", "minimalism", "dark_mode", "pastel_colors", "serif_fonts") from the prompt and inspiration summary using a keyword dictionary.
+-   **Analyzes Trends:** Identifies relevant UI/UX trends (e.g., "glassmorphism", "minimalism", "dark_mode", "pastel_colors", "serif_fonts") from the prompt and inspiration summary using an expanded keyword dictionary. Includes broader trend recognition for styles like cyberpunk, art deco, skeuomorphism, playful, and corporate aesthetics, among others.
 -   **Generates React + Tailwind CSS Code:**
     -   Creates code for individual components including: Buttons, Cards, Login Forms, NavBars, Footers, Hero Sections, Feature Cards, and Testimonials.
     -   Generates "full-page" layouts by assembling a sensible structure from available components.
-    -   Applies styling to components responsive to identified trends and color modes.
+    -   Applies styling to components responsive to identified trends and color modes. For example, the "cyberpunk" trend might generate elements with neon-like text and sharp, dark backgrounds, while "playful_aesthetic" might use more rounded elements and brighter accents.
 -   **Suggests Assets (Live & Mock Data):**
     -   **Live Fonts (Conceptual):** Attempts to fetch font suggestions from the Google Fonts API if a `GOOGLE_FONTS_API_KEY` is configured and relevant font trends (e.g., "serif_fonts") are identified.
     -   **Mock Assets:** Recommends other assets (icons, images) and fallback fonts from local mock data, aligning with design trends and inspiration.
@@ -28,6 +28,13 @@ The agent accepts the following inputs, defined in `schema.py` as `AgentInput`:
 -   `prompt` (str): A textual description of the desired UI component or page. Examples:
     -   `"a sleek login form with glassmorphism"`
     -   `"a full-page landing site with a hero section, using glassmorphism and dark mode"`
+    -   `"a minimalist navigation bar with serif fonts"`
+    -   `"a feature card component with pastel colors"`
+    -   `"generate a page with a navbar, three feature cards, and a footer"`
+    -   `"dark mode testimonial quote"`
+    -   `"a playful onboarding modal with handwritten fonts"`
+    -   `"a cyberpunk dashboard header with neon future elements"`
+    -   `"corporate style button for a formal UI"`
 -   `tech_stack` (Literal["react-tailwind", "html-css", "vue", "svelte"]): The desired technology stack. **Currently, only "react-tailwind" is implemented for code generation.**
 -   `color_mode` (Literal["light", "dark", "auto"]): The preferred color scheme for the UI.
 -   `layout_type` (Literal["component", "full-page"]): Specifies whether to generate a single component or a full page structure.
