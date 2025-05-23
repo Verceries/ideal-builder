@@ -1,6 +1,6 @@
 # Frontend Trend Builder
 
-**Version:** 0.3.0
+**Version:** 0.5.0 (Data Provider Refactor)
 
 ## Description
 
