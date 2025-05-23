@@ -11,20 +11,19 @@ The Frontend Trend Builder is an autonomous agent designed to streamline the ini
 -   **Inspiration Gathering (Unsplash):**
     -   The `unsplash_provider.py` module (via `fetch_unsplash_images`) attempts to fetch inspiration images from Unsplash using an API key (`UNSPLASH_API_KEY` in `.env`).
     -   **Scraping Fallback:** If the API key is missing, invalid, or the API call fails, it attempts to scrape Unsplash search results.
-    -   **Mock Data Fallback:** If both API and scraping fail, it uses a predefined list of mock Unsplash images.
+    -   **Mock Data Fallback:** If both the API call and scraping fail, the system defaults to a static set of predefined mock images (from `data/mock_inspiration_data.json` via `_MOCK_UNSPLASH_DATA` in the provider).
     -   All returned image data includes a `source` field indicating its origin (e.g., `"Unsplash_API"`, `"Unsplash_Scrape"`, `"Unsplash_Mock_Fallback"`).
 -   **Font Suggestions (Google Fonts):**
     -   The `google_fonts_provider.py` module (via `fetch_google_fonts`, used within `suggest_assets.py`) attempts to fetch font suggestions from the Google Fonts API if `GOOGLE_FONTS_API_KEY` is configured in `.env`.
     -   Font suggestions are targeted based on identified trend tags (e.g., "serif_fonts", "cyberpunk_fonts").
-    -   **Mock Fallback:** If the API call fails, is not configured, or returns no results for a requested category, `suggest_assets.py` falls back to providing relevant fonts from `mock_asset_data.json`, matching by font category.
+    -   **Mock Fallback:** If a font category cannot be resolved via the API (e.g., key issue, no results), `suggest_assets.py` defaults to suggesting relevant entries from `data/mock_asset_data.json`, matching by font category.
     -   All suggested fonts include a `source` field (e.g., `"GoogleFonts_API"`, `"mock_fallback_font"`).
 -   **Trend Analysis:**
     *   Identifies relevant UI/UX trends from the user's prompt and inspiration summary using an expanded keyword dictionary (`data/trend_dictionary.json`).
     *   Recognizes a broader range of styles, including `cyberpunk`, `art_deco`, `skeuomorphism`, `playful_aesthetic`, and `corporate_style`, among others.
 -   **Code Generation (React + Tailwind CSS):**
-    -   **Component Templates:** Provides templates for `Navbar`, `Hero Section`, `Features Section`, `Footer`, `Testimonial`, and `Modal` components. These templates are now organized into individual files within `actions/code_templates/react_tailwind/`.
-    -   **Full-Page Layout Assembly:** Implemented logic in `generate_code.py` (specifically `assemble_full_page_layout`) to construct full-page layouts. This function interprets the user's prompt to determine the sequence and count of components (e.g., "a page with a navbar, two hero sections, and a footer"). If the prompt is vague, a default layout (Navbar, Features Section, Footer) is used.
-    -   **Single Component Generation:** Can still generate code for individual components based on keywords in the prompt.
+    -   **Component Templates:** Provides templates for `Navbar`, `Hero Section`, `Feature Section`, `Footer`, `Testimonial`, and `Modal` components. These templates are now organized into individual files within `actions/code_templates/react_tailwind/`.
+    -   **Full-Page Layout Assembly:** Implemented logic in `generate_code.py` (specifically `assemble_full_page_layout`) to construct full-page layouts. This function interprets the user's prompt to determine the sequence and count of components (e.g., "a page with a navbar, two Hero Sections, and a footer"). If the prompt is vague, a default layout (Navbar, Feature Section, Footer) is used.
 -   **Asset Suggestion Improvements:**
     -   Font suggestions are more targeted based on trend analysis (e.g., suggesting "handwriting" category fonts for "playful_aesthetic_fonts").
     -   All suggested assets (fonts, icons, images) now include a `source` field (e.g., `"GoogleFonts_API"`, `"Unsplash_API"`, `"mock_icon"`, `"mock_font"`) for better clarity on their origin.
@@ -33,8 +32,8 @@ The Frontend Trend Builder is an autonomous agent designed to streamline the ini
 
 The agent accepts the following inputs, defined in `schema.py` as `AgentInput`:
 
--   `prompt` (str): A textual description of the desired UI component or page (e.g., "Create a page with a navbar, a hero section, two features sections, and a footer.").
--   `tech_stack` (Literal["react-tailwind", "html-css", "vue", "svelte"]): The desired technology stack. **Currently, only "react-tailwind" is actively implemented for code generation.**
+-   `prompt` (str): A textual description of the desired UI component or page (e.g., "Create a page with a navbar, a hero section, two Feature Sections, and a footer.").
+-   `tech_stack` (Literal["react-tailwind", "html-css", "vue", "svelte"]): The desired technology stack. 🔧 **Note:** While `tech_stack` accepts multiple values ("react-tailwind", "html-css", "vue", "svelte"), only **"react-tailwind" is currently functional**. The others are reserved for future template expansion (see v0.4.0+ Roadmap).
 -   `color_mode` (Literal["light", "dark", "auto"]): The preferred color scheme for the UI.
 -   `layout_type` (Literal["component", "full-page"]): Specifies whether to generate a single component or a full page structure.
 
@@ -63,6 +62,7 @@ This project uses a `.env` file to manage API keys for external services and oth
     ```bash
     cp .env.example .env
     ```
+    After copying, update the `.env` file with your personal API keys (for Unsplash and Google Fonts) and any desired `LOG_LEVEL` configuration. These keys are optional but strongly recommended for enabling live data integration and achieving the best results.
 
 3.  **Edit your `.env` file**:
     Open the newly created `.env` file with a text editor.
@@ -93,7 +93,25 @@ The application, via `config.py`, will load these settings from the `.env` file 
 
 **Important:** Remember to keep your `.env` file private and **do not commit it to version control**. The `.gitignore` file in this project is already configured to ignore `.env` files.
 
-**Note on API Usage Simulation:** The agent uses the `view_text_website` tool (via `data_providers/http_client.py`) to simulate API calls. In a real-world scenario, these would be direct HTTP requests using libraries like `requests`.
+## Quickstart
+
+```bash
+# 1. Clone the repository
+# Replace 'your-repo/frontend-trend-builder' with the actual repository URL if different
+git clone https://github.com/your-repo/frontend-trend-builder 
+cd frontend-trend-builder
+
+# 2. Install dependencies (assuming a requirements.txt exists)
+# If requirements.txt is not present or incomplete, this step might need adjustment.
+pip install -r requirements.txt 
+
+# 3. Copy and configure .env (optional, for live API data)
+cp .env.example .env
+# Edit .env with your API keys (UNSPLASH_API_KEY, GOOGLE_FONTS_API_KEY)
+
+# 4. Run the example script
+python frontend_trend_builder/main.py
+```
 
 ## How to Run
 
@@ -109,7 +127,8 @@ from frontend_trend_builder.schema import AgentInput
 
 # Example: Generate a full landing page with specific trends
 inputs = AgentInput(
-    prompt="Create a page with a navbar, a hero section, two features sections, and a footer. The style should be modern and minimalist.",
+    prompt="Create a page with a navbar, a hero section, two Feature Sections, and a footer. The style should be modern and minimalist.",
+    prompt="Create a page with a navbar, a hero section, two Feature Sections, and a footer. The style should be modern and minimalist.",
     tech_stack="react-tailwind",
     color_mode="light",
     layout_type="full-page"
@@ -142,18 +161,18 @@ output = run_agent(inputs)
 -   **API Key Requirement:** Live API integration for Unsplash and Google Fonts provides the best results and requires users to obtain and correctly configure their own API keys in the `.env` file. Without these, the agent falls back to mock data or scraping.
 -   **Experimental Scraping:** The HTML scraping for Unsplash inspiration is a basic implementation and is highly dependent on Unsplash's website structure. It may break if the site's HTML changes significantly and is less reliable than the API.
 -   **API Rate Limits:** If using personal or demo API keys, be mindful of potential rate limits imposed by Unsplash and Google Fonts.
--   **Simulated API Calls:** External API calls are simulated using a `view_text_website` tool. A production version would use direct HTTP requests.
+-   **API Interaction Simulation:** API integrations are handled via a wrapper (`http_client.py`) around the `view_text_website` tool, simulating HTTP requests. This allows standardized behavior across environments, though it may differ from production-grade HTTP libraries like `requests`.
 -   **Limited Scope of Analysis:** Trend analysis and inspiration matching are based on keyword dictionaries and simple text matching. Prompt interpretation for full-page layout component order and count is rule-based and may not understand all natural language nuances.
--   **Styling Application:** While trend-specific styling rules exist in `apply_trend_styles`, their application to the refactored static template strings (especially for full-page layouts) is currently limited. The generated code uses the base styles from the templates; dynamic and granular style injection based on trends across the entire page structure is an area for future improvement.
+-   **Styling Application:** Trend-specific styling rules exist via the `apply_trend_styles` function, but their application is currently limited—especially for multi-component page layouts. Templates mostly reflect general structure and must be manually customized for more nuanced styling.
 
 ## Directory Structure
 
 -   `frontend-trend-builder/`
     -   `actions/`: Contains Python scripts for individual agent capabilities.
         -   `code_templates/`: Contains component string templates.
-            -   `react_tailwind/`: Contains React+Tailwind CSS component templates (e.g., `navbar.py`, `hero.py`).
+            -   `react_tailwind/`: Contains React + Tailwind CSS component templates (e.g., `navbar.py`, `hero.py`).
         -   `analyze_trends.py`: Identifies trends from text.
-        -   `generate_code.py`: Generates React+Tailwind code from templates.
+        -   `generate_code.py`: Generates React + Tailwind CSS code from templates.
         -   `suggest_assets.py`: Suggests fonts, icons, and images.
         -   `gather_inspiration.py`: Fetches inspiration from Unsplash.
     -   `config.py`: Manages loading of API keys and configurations.
