@@ -36,6 +36,78 @@
     "tags": ["modern_ui", "developer", "code", "dashboard", "dark_mode"]
   },
   {
+    "type": "font",
+    "name": "Orbitron",
+    "url_mock": "http://fonts.example.com/orbitron",
+    "tags": ["cyberpunk", "futuristic_fonts", "display", "geometric_sans_serif"],
+    "category_mock": "display",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Monoton",
+    "url_mock": "http://fonts.example.com/monoton",
+    "tags": ["cyberpunk", "retro_futuristic_fonts", "display"],
+    "category_mock": "display",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Bebas Neue",
+    "url_mock": "http://fonts.example.com/bebas_neue",
+    "tags": ["art_deco", "geometric_sans_serif_fonts", "display", "condensed"],
+    "category_mock": "display",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Poppins",
+    "url_mock": "http://fonts.example.com/poppins",
+    "tags": ["art_deco", "geometric_sans_serif_fonts", "modern_ui"],
+    "category_mock": "sans-serif",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Inter",
+    "url_mock": "http://fonts.example.com/inter",
+    "tags": ["skeuomorphism", "neutral_sans_serif_fonts", "ui_fonts", "accessibility"],
+    "category_mock": "sans-serif",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Pacifico",
+    "url_mock": "http://fonts.example.com/pacifico",
+    "tags": ["playful_aesthetic", "script_fonts", "handwritten_fonts", "fun"],
+    "category_mock": "handwriting",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Comfortaa",
+    "url_mock": "http://fonts.example.com/comfortaa",
+    "tags": ["playful_aesthetic", "rounded_sans_serif_fonts", "friendly"],
+    "category_mock": "sans-serif",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Open Sans",
+    "url_mock": "http://fonts.example.com/open_sans",
+    "tags": ["corporate_style", "neutral_sans_serif_fonts", "accessibility", "modern_ui"],
+    "category_mock": "sans-serif",
+    "source": "mock_fallback"
+  },
+  {
+    "type": "font",
+    "name": "Merriweather",
+    "url_mock": "http://fonts.example.com/merriweather",
+    "tags": ["corporate_style", "serif_fonts", "readability"],
+    "category_mock": "serif",
+    "source": "mock_fallback"
+  },
+  {
     "type": "image",
     "name": "Abstract Geometric Background",
     "url_mock": "http://images.example.com/abstract_geometric_bg.jpg",

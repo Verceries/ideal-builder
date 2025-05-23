@@ -88,92 +88,143 @@ if __name__ == '__main__':
 
     # This global mock for view_text_website is for standalone testing of this script.
     # It simulates the behavior of the actual tool.
+    
+    # Global state for mock_view_text_website to control API responses for tests
+    _mock_api_configs = {} 
+
     if 'view_text_website' not in globals():
         def view_text_website(url: str) -> Optional[str]:
-            logger.debug(f"[Local Mock] view_text_website called for URL: {url}")
+            global _mock_api_configs
+            logger.debug(f"[Local Mock] view_text_website called for URL: {url}. Current mock config: {_mock_api_configs}")
+
             if "googleapis.com/webfonts/v1/webfonts" in url:
                 # Simulate key check behavior of the actual fetch_google_fonts function
-                if not GOOGLE_FONTS_API_KEY or GOOGLE_FONTS_API_KEY == CONFIG_GOOGLE_FONTS_KEY_PLACEHOLDER:
-                    logger.warning("[Local Mock] Google Fonts API key is placeholder or not set. Simulating API error/no call.")
-                    # In reality, fetch_google_fonts would skip the call. Here, we simulate fetch_url_text returning None or error.
-                    raise DataProviderError("Mock API Key Error: Key is placeholder or not set for this test.")
+                # This check is done *before* fetch_url_text is called in the real function.
+                # So, if the key is bad, fetch_url_text (and thus this mock) shouldn't even be called.
+                # However, for testing the provider's internal call to fetch_url_text, we can simulate errors here.
 
+                if _mock_api_configs.get("force_error"):
+                    logger.warning("[Local Mock] Simulating forced API error.")
+                    raise DataProviderError("Mock API Error: Forced error for testing.")
+                
+                if _mock_api_configs.get("return_empty_items"):
+                    logger.info("[Local Mock] Simulating API returning empty list of items.")
+                    return json.dumps({"kind": "webfonts#webfontList", "items": []})
+
+                # Default mock response if no specific config matches
                 mock_items = []
-                if "category=serif" in url or ("sort=popularity" in url and "category=" not in url):
-                    mock_items.extend([
-                        {"family": "Lora", "category": "serif"},
-                        {"family": "Merriweather", "category": "serif"}
-                    ])
-                if "category=sans-serif" in url or ("sort=popularity" in url and "category=" not in url):
-                     mock_items.extend([
-                        {"family": "Roboto", "category": "sans-serif"},
-                        {"family": "Open Sans", "category": "sans-serif"}
-                    ])
-                # If no category specified, and sort=popularity, return a mix for testing _parse_google_fonts_api_response's own filtering
-                if "category=" not in url and "sort=popularity" in url :
-                     mock_items.extend([
-                        {"family": "Display Font", "category": "display"}, # Add one non-matching for parse filter test
-                     ])
+                # Determine category from URL for more dynamic mocking if needed
+                url_category = None
+                if "category=" in url:
+                    try:
+                        url_category = url.split("category=")[1].split("&")[0]
+                    except IndexError:
+                        pass
+                
+                logger.info(f"[Local Mock] Detected category from URL: {url_category}")
 
-                return json.dumps({"kind": "webfonts#webfontList", "items": mock_items[:5]}) # Limit items
+                if url_category == "serif" or not url_category: # also provide if no category (general query)
+                    mock_items.extend([
+                        {"family": "Mock Serif 1", "category": "serif", "variants": ["regular", "italic", "700"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mockserif1.ttf"}},
+                        {"family": "Mock Serif 2", "category": "serif", "variants": ["regular"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mockserif2.ttf"}}
+                    ])
+                if url_category == "sans-serif" or not url_category:
+                     mock_items.extend([
+                        {"family": "Mock Sans-Serif 1", "category": "sans-serif", "variants": ["regular", "italic", "700"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mocksans1.ttf"}},
+                        {"family": "Mock Sans-Serif 2", "category": "sans-serif", "variants": ["regular"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mocksans2.ttf"}}
+                    ])
+                if url_category == "display" or not url_category:
+                     mock_items.extend([
+                        {"family": "Mock Display", "category": "display", "variants": ["regular"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mockdisplay.ttf"}}
+                     ])
+                if url_category == "handwriting" or not url_category: # Added for future tests
+                     mock_items.extend([
+                        {"family": "Mock Handwriting", "category": "handwriting", "variants": ["regular"], "subsets": ["latin"], "version": "v1", "lastModified": "2023-01-01", "files": {"regular": "http://example.com/mockhandwriting.ttf"}}
+                     ])
+                
+                # Filter by the specific category requested if the mock has it, otherwise the parser will handle it.
+                # The actual API does filtering server-side.
+                # This mock simply provides a broad set if no category, or specific if category matches.
+                
+                final_mock_items = []
+                if url_category:
+                    final_mock_items = [item for item in mock_items if item["category"] == url_category]
+                else: # if no category in url, return all for general popularity sort
+                    final_mock_items = mock_items
+
+                logger.info(f"[Local Mock] Returning {len(final_mock_items)} items for category '{url_category or 'any'}'.")
+                return json.dumps({"kind": "webfonts#webfontList", "items": final_mock_items[:5]}) # Limit items
+
             logger.error(f"[Local Mock] Unhandled URL: {url}")
             return None
 
-    # Test 1: API call for serif fonts (simulating key is set)
-    logger.info("\n--- Test 1: Fetch serif fonts via API (simulating valid key) ---")
-    # Temporarily modify the global GOOGLE_FONTS_API_KEY for this test block
-    # This approach is okay for __main__ but unittest.mock.patch is better for formal tests.
-    original_key_state = GOOGLE_FONTS_API_KEY
-    globals()['GOOGLE_FONTS_API_KEY'] = "DUMMY_VALID_KEY_FOR_TEST_IN_MAIN" 
-    
+    # Backup original API key and mock config
+    original_key_for_tests = GOOGLE_FONTS_API_KEY
+    original_mock_api_configs = _mock_api_configs.copy()
+
+    def set_test_conditions(api_key_value, mock_config=None):
+        """Helper to set API key and mock configuration for a test."""
+        global GOOGLE_FONTS_API_KEY, _mock_api_configs
+        GOOGLE_FONTS_API_KEY = api_key_value
+        _mock_api_configs = mock_config if mock_config is not None else {}
+
+    # Test 1: Valid key, fetch serif fonts
+    logger.info("\n--- Test 1: Valid key, Fetch serif fonts ---")
+    set_test_conditions("DUMMY_VALID_KEY")
     results_serif = fetch_google_fonts(category="serif")
-    if results_serif:
-        logger.info(f"Serif font results: {json.dumps(results_serif, indent=2)}")
-        assert all(f['category'] == 'serif' for f in results_serif), "All fetched fonts should be serif"
-    else:
-        logger.info("API call (serif) did not return results (check mock or key).")
-    
-    globals()['GOOGLE_FONTS_API_KEY'] = original_key_state # Restore
+    assert results_serif and all(f['category'] == 'serif' for f in results_serif), "Test 1 Failed: Serif fonts not fetched correctly."
+    logger.info(f"Test 1 OK: Fetched {len(results_serif)} serif fonts: {json.dumps(results_serif, indent=2)}")
 
-    # Test 2: API call for sans-serif fonts (simulating key is set)
-    logger.info("\n--- Test 2: Fetch sans-serif fonts via API (simulating valid key) ---")
-    original_key_state = GOOGLE_FONTS_API_KEY
-    globals()['GOOGLE_FONTS_API_KEY'] = "DUMMY_VALID_KEY_FOR_TEST_IN_MAIN"
-    
-    results_sans_serif = fetch_google_fonts(category="sans-serif")
-    if results_sans_serif:
-        logger.info(f"Sans-serif font results: {json.dumps(results_sans_serif, indent=2)}")
-        assert all(f['category'] == 'sans-serif' for f in results_sans_serif), "All fetched fonts should be sans-serif"
-    else:
-        logger.info("API call (sans-serif) did not return results (check mock or key).")
-        
-    globals()['GOOGLE_FONTS_API_KEY'] = original_key_state
+    # Test 2: Valid key, fetch all popular fonts (no category)
+    logger.info("\n--- Test 2: Valid key, Fetch all popular fonts ---")
+    set_test_conditions("DUMMY_VALID_KEY")
+    results_all_popular = fetch_google_fonts(sort_by="popularity")
+    assert results_all_popular and len(results_all_popular) > 0, "Test 2 Failed: Popular fonts not fetched."
+    # Check if it contains a mix of categories as per mock
+    categories_in_results = {f['category'] for f in results_all_popular}
+    assert "serif" in categories_in_results and "sans-serif" in categories_in_results, "Test 2 Failed: Expected multiple categories."
+    logger.info(f"Test 2 OK: Fetched {len(results_all_popular)} popular fonts with mixed categories.")
 
-    # Test 3: API call (simulating key is placeholder/None)
-    logger.info("\n--- Test 3: Fetch via API (simulating key as placeholder) ---")
-    original_key_state = GOOGLE_FONTS_API_KEY
-    globals()['GOOGLE_FONTS_API_KEY'] = CONFIG_GOOGLE_FONTS_KEY_PLACEHOLDER 
+    # Test 3: API key is placeholder
+    logger.info("\n--- Test 3: API key is placeholder ---")
+    set_test_conditions(CONFIG_GOOGLE_FONTS_KEY_PLACEHOLDER)
+    results_placeholder = fetch_google_fonts(category="serif")
+    assert results_placeholder == [], f"Test 3 Failed: Expected empty list for placeholder key, got {results_placeholder}"
+    logger.info("Test 3 OK: Correctly returned empty list for placeholder key.")
+
+    # Test 4: API key is None
+    logger.info("\n--- Test 4: API key is None ---")
+    set_test_conditions(None)
+    results_none_key = fetch_google_fonts(category="serif")
+    assert results_none_key == [], f"Test 4 Failed: Expected empty list for None key, got {results_none_key}"
+    logger.info("Test 4 OK: Correctly returned empty list for None key.")
+
+    # Test 5: Valid key, but API returns an error (simulated)
+    logger.info("\n--- Test 5: Valid key, API returns error ---")
+    set_test_conditions("DUMMY_VALID_KEY", mock_config={"force_error": True})
+    results_api_error = fetch_google_fonts(category="serif")
+    assert results_api_error == [], f"Test 5 Failed: Expected empty list on API error, got {results_api_error}"
+    logger.info("Test 5 OK: Correctly returned empty list on simulated API error.")
+
+    # Test 6: Valid key, but API returns no items for a valid query
+    logger.info("\n--- Test 6: Valid key, API returns no items ---")
+    set_test_conditions("DUMMY_VALID_KEY", mock_config={"return_empty_items": True})
+    results_empty_items = fetch_google_fonts(category="serif")
+    assert results_empty_items == [], f"Test 6 Failed: Expected empty list when API returns no items, got {results_empty_items}"
+    logger.info("Test 6 OK: Correctly returned empty list when API returns no items.")
     
-    results_no_key = fetch_google_fonts(category="serif")
-    if not results_no_key:
-        logger.info("API call correctly returned no results due to placeholder key.")
-    else:
-        logger.error(f"API call unexpectedly returned results with placeholder key: {results_no_key}")
-        
-    globals()['GOOGLE_FONTS_API_KEY'] = original_key_state
-    
-    # Test 4: API call for all popular fonts (simulating key is set)
-    logger.info("\n--- Test 4: Fetch all popular fonts via API (simulating valid key) ---")
-    original_key_state = GOOGLE_FONTS_API_KEY
-    globals()['GOOGLE_FONTS_API_KEY'] = "DUMMY_VALID_KEY_FOR_TEST_IN_MAIN" 
-    
-    results_all_popular = fetch_google_fonts(sort_by="popularity") # No category filter
-    if results_all_popular:
-        logger.info(f"All popular font results (first 5): {json.dumps(results_all_popular[:5], indent=2)}")
-        assert len(results_all_popular) > 0 
-    else:
-        logger.info("API call (all popular) did not return results (check mock or key).")
-        
-    globals()['GOOGLE_FONTS_API_KEY'] = original_key_state
+    # Test 7: Valid key, fetch for a category that mock might not have explicitly, ensure it's empty or parser handles it.
+    logger.info("\n--- Test 7: Valid key, Fetch 'monospace' fonts (mock may not have this category explicitly) ---")
+    set_test_conditions("DUMMY_VALID_KEY") # Mock returns specific categories or all if no category given.
+                                       # If "monospace" is requested, mock returns empty for that category.
+    results_monospace = fetch_google_fonts(category="monospace")
+    # The mock for view_text_website, if category is specified, filters by it. If 'monospace' is not in mock_items, it will be empty.
+    assert results_monospace == [], f"Test 7 Failed: Expected empty list for 'monospace' if not in mock, got {results_monospace}"
+    logger.info(f"Test 7 OK: Fetched {len(results_monospace)} monospace fonts (expected empty if not in specific mock).")
+
+
+    # Restore original API key and mock config
+    GOOGLE_FONTS_API_KEY = original_key_for_tests
+    _mock_api_configs = original_mock_api_configs
 
     logger.info("--- End of google_fonts_provider.py tests ---")

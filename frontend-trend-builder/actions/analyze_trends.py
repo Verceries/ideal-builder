@@ -100,4 +100,64 @@ if __name__ == '__main__':
     print(f"\n--- Trends for '{test_prompt_6}' & short inspiration ---")
     print(f"Identified trends: {trends_6}")
 
+    # Test cases for new/updated trend tags
+    logger.info("\n--- Verifying new and updated trend tags ---")
+
+    test_cases_new_trends = {
+        "cyberpunk_test": {
+            "prompt": "A website design with a cyberpunk feel, neon future vibes.",
+            "inspiration": "Think dystopian tech and hacker aesthetic.",
+            "expected": ["cyberpunk"]
+        },
+        "art_deco_test": {
+            "prompt": "An art deco login page for a luxury hotel.",
+            "inspiration": "Inspired by gatsby style and geometric opulence.",
+            "expected": ["art_deco", "luxury_aesthetic", "Login Form", "geometric_patterns"]
+        },
+        "skeuomorphism_test": {
+            "prompt": "A skeuomorphic UI for a music app.",
+            "inspiration": "Wants real world textures and realistic UI elements.",
+            "expected": ["skeuomorphism"]
+        },
+        "playful_aesthetic_test": {
+            "prompt": "A playful and fun website for a children's toy store.",
+            "inspiration": "Should be whimsical and quirky.",
+            "expected": ["playful_aesthetic"]
+        },
+        "corporate_style_test": {
+            "prompt": "A professional and formal UI for a businesslike corporate portal.",
+            "inspiration": "The company wants a very corporate style for their new site.",
+            "expected": ["corporate_style"]
+        },
+         "mixed_trends_test": {
+            "prompt": "A dark mode cyberpunk dashboard with art deco elements.",
+            "inspiration": "User wants a tech noir feel combined with roaring twenties opulence.",
+            "expected": ["dark_mode", "cyberpunk", "art_deco", "data_visualization"] # data_visualization from "dashboard"
+        }
+    }
+
+    for test_name, data in test_cases_new_trends.items():
+        logger.info(f"\n--- Running Test: {test_name} ---")
+        print(f"\n--- Test: {test_name} ---")
+        print(f"Prompt: {data['prompt']}")
+        print(f"Inspiration: {data['inspiration']}")
+        trends_identified = identify_trends(data['prompt'], data['inspiration'])
+        print(f"Identified trends: {trends_identified}")
+        
+        missing_trends = set(data['expected']) - set(trends_identified)
+        unexpected_trends = set(trends_identified) - set(data['expected'])
+        
+        if not missing_trends and not unexpected_trends:
+            print(f"VERIFICATION PASSED for {test_name}.")
+            logger.info(f"VERIFICATION PASSED for {test_name}.")
+        else:
+            print(f"VERIFICATION FAILED for {test_name}:")
+            logger.error(f"VERIFICATION FAILED for {test_name}:")
+            if missing_trends:
+                print(f"  Missing expected trends: {missing_trends}")
+                logger.error(f"  Missing expected trends: {missing_trends}")
+            if unexpected_trends:
+                print(f"  Found unexpected trends: {unexpected_trends}")
+                logger.error(f"  Found unexpected trends: {unexpected_trends}")
+
     logger.info("--- End of analyze_trends.py standalone examples ---")
