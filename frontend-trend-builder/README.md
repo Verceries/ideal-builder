@@ -1,10 +1,19 @@
 # Frontend Trend Builder
 
-**Version:** 0.5.0 (Data Provider Refactor)
+**Version:** 0.5.1
 
 ## Description
 
 The Frontend Trend Builder is an autonomous agent designed to streamline the initial phases of frontend development. It attempts to gather live design inspiration (from Unsplash) and font suggestions (from Google Fonts) if API keys are configured via a `.env` file. Data fetching from external sources is handled by dedicated data provider modules. If live data fetching is not possible (e.g., missing keys, network issues), it falls back to analyzing user prompts against local mock data. It then interprets current UI/UX trends from a predefined dictionary and uses this information to generate boilerplate frontend code (React + Tailwind CSS) and suggest relevant assets. This agent aims to accelerate the process of translating ideas into tangible frontend structures.
+
+## Changelog
+
+### v0.5.1 (2024-05-23)
+
+- **README Enhancements:** Incorporated various user-suggested improvements to documentation structure, clarity on API simulation, `tech_stack` capabilities, styling limitations, mock fallbacks, and `.env` configuration. Added a "Quickstart" section.
+- **Build & Test Process (Ongoing):**
+    - Investigated E2E testing challenges. `main.py`'s primary execution block (`if __name__ == '__main__':`) was unintentionally left with a specific test case due to difficulties in automated reversion; this primarily affects direct execution of `main.py` but not its module functionality.
+    - Planned addition of a dedicated test script (`scripts/run_test_case.py`) and further investigation into import errors were not completed due to tooling issues. E2E testing capabilities remain pending.
 
 ## Features
 

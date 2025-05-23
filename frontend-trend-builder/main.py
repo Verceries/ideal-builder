@@ -58,7 +58,7 @@ def run_agent(input_data: AgentInput) -> AgentOutput:
     logger.info(f"Calling create_code with inspiration_summary (first 100 chars): '{inspiration_summary_str[:100]}...', trends: {trend_tags}, stack: {input_data['tech_stack']}")
     try:
         frontend_code = generate_code.create_code(
-            inspiration_summary=inspiration_summary_str,
+            inspiration_summary=inspiration_summary_str, # Pass inspiration_summary (which is the prompt for full page)
             trend_tags=trend_tags,
             tech_stack=input_data["tech_stack"],
             color_mode=input_data["color_mode"],
@@ -72,7 +72,7 @@ def run_agent(input_data: AgentInput) -> AgentOutput:
     logger.info(f"Calling get_asset_suggestions with inspiration_summary (first 100 chars): '{inspiration_summary_str[:100]}...' and trends: {trend_tags}")
     try:
         raw_asset_output = suggest_assets.get_asset_suggestions(
-            inspiration_summary=inspiration_summary_str,
+            inspiration_summary=inspiration_summary_str, # Pass inspiration_summary (prompt for asset context)
             trend_tags=trend_tags
         )
         if isinstance(raw_asset_output, list):
@@ -96,48 +96,28 @@ def run_agent(input_data: AgentInput) -> AgentOutput:
     return output_data
 
 if __name__ == '__main__':
-    logger.info("--- Starting Agent Demo from main.py ---") # Changed from logging.info
-
-    logger.info("\n--- Example 1: React-Tailwind Dark Mode Component ---")
-    sample_input_1: AgentInput = {
-        "prompt": "A sleek glassmorphic login form for a modern crypto app.",
-        "tech_stack": "react-tailwind",
-        "color_mode": "dark",
-        "layout_type": "component"
-    }
-    agent_result_1 = run_agent(sample_input_1)
-    logger.info("\n--- Agent Output 1 (Logged) ---") # Changed from print
-    logger.info(f"Inspiration: {agent_result_1['inspiration_summary']}")
-    logger.info(f"Identified Trends: {agent_result_1['trend_tags']}")
-    logger.info(f"Generated Code Snippet (first 200 chars): {agent_result_1['frontend_code'][:200]}...")
-    logger.info(f"Suggested Assets: {agent_result_1['asset_suggestions']}")
-
-    logger.info("\n--- Example 2: Vue Component (Code Gen Not Implemented) ---")
-    sample_input_2: AgentInput = {
-        "prompt": "Minimalist portfolio page with pastel color accents.",
-        "tech_stack": "vue", 
-        "color_mode": "light",
-        "layout_type": "full-page"
-    }
-    agent_result_2 = run_agent(sample_input_2)
-    logger.info("\n--- Agent Output 2 (Logged) ---") # Changed from print
-    logger.info(f"Inspiration: {agent_result_2['inspiration_summary']}")
-    logger.info(f"Identified Trends: {agent_result_2['trend_tags']}")
-    logger.info(f"Generated Code Snippet: {agent_result_2['frontend_code']}") 
-    logger.info(f"Suggested Assets: {agent_result_2['asset_suggestions']}")
-
-    logger.info("\n--- Example 3: Prompt with No Inspiration Matches ---")
-    sample_input_3: AgentInput = {
-        "prompt": "asdfghjkl_unlikely_to_match_anything_qwertyuiop",
-        "tech_stack": "react-tailwind",
-        "color_mode": "light",
-        "layout_type": "component"
-    }
-    agent_result_3 = run_agent(sample_input_3)
-    logger.info("\n--- Agent Output 3 (Logged) ---") # Changed from print
-    logger.info(f"Inspiration: {agent_result_3['inspiration_summary']}") 
-    logger.info(f"Identified Trends: {agent_result_3['trend_tags']}")     
-    logger.info(f"Generated Code Snippet: {agent_result_3['frontend_code']}") 
-    logger.info(f"Suggested Assets: {agent_result_3['asset_suggestions']}") 
-
-    logger.info("\n--- Agent Demo Completed ---")
+    # Default example prompt
+    example_input = AgentInput(
+        prompt="Create a sleek, modern login page for a new SaaS product. Use dark mode and glassmorphism.",
+        tech_stack="react-tailwind",
+        color_mode="dark",
+        layout_type="component" # Or "full-page" for a broader example
+    )
+    
+    logger.info(f"--- Running Default Example from main.py ---")
+    logger.info(f"Input: {example_input}")
+    
+    result = run_agent(example_input)
+    
+    print("\n--- Agent Output (Default Example) ---")
+    print(f"Identified Trends: {result['trend_tags']}")
+    print(f"Inspiration Summary: {result['inspiration_summary']}")
+    print("\nSuggested Assets:")
+    if result['asset_suggestions']:
+        for asset in result['asset_suggestions']:
+            print(f"- Name: {asset.get('name', 'N/A')}, Type: {asset.get('type', 'N/A')}, Source: {asset.get('source', 'N/A')}")
+    else:
+        print("No assets suggested.")
+    print("\nGenerated Frontend Code (React + Tailwind CSS - Snippet):")
+    print(result['frontend_code'][:1000] + "..." if len(result['frontend_code']) > 1000 else result['frontend_code'])
+    logger.info(f"--- Default Example Run Completed ---")
