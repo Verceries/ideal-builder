@@ -1,16 +1,16 @@
 # Frontend Trend Builder
 
-**Version:** 0.4.0 (Centralized Configuration)
+**Version:** 0.5.0 (Data Provider Refactor)
 
 ## Description
 
-The Frontend Trend Builder is an autonomous agent designed to streamline the initial phases of frontend development. It attempts to gather live design inspiration (from Unsplash) and font suggestions (from Google Fonts) if API keys are configured via a `.env` file. If live data fetching is not possible (e.g., missing keys, network issues), it falls back to analyzing user prompts against local mock data. It then interprets current UI/UX trends from a predefined dictionary and uses this information to generate boilerplate frontend code (React + Tailwind CSS) and suggest relevant assets. This agent aims to accelerate the process of translating ideas into tangible frontend structures.
+The Frontend Trend Builder is an autonomous agent designed to streamline the initial phases of frontend development. It attempts to gather live design inspiration (from Unsplash) and font suggestions (from Google Fonts) if API keys are configured via a `.env` file. Data fetching from external sources is handled by dedicated data provider modules. If live data fetching is not possible (e.g., missing keys, network issues), it falls back to analyzing user prompts against local mock data. It then interprets current UI/UX trends from a predefined dictionary and uses this information to generate boilerplate frontend code (React + Tailwind CSS) and suggest relevant assets. This agent aims to accelerate the process of translating ideas into tangible frontend structures.
 
 ## Features
 
 -   **Gathers Inspiration (Live & Mock Data):**
-    -   **Live (Conceptual):** Attempts to fetch inspiration images from Unsplash via its API if `UNSPLASH_API_KEY` is configured in `.env`.
-    -   **Experimental Scraping:** If the Unsplash API call fails or is not configured, it attempts a basic HTML scrape of Unsplash search results.
+    -   **Live (Conceptual):** Attempts to fetch inspiration images from Unsplash via its API (using the `unsplash_provider`) if `UNSPLASH_API_KEY` is configured in `.env`.
+    -   **Experimental Scraping:** If the Unsplash API call fails or is not configured, the `unsplash_provider` attempts a basic HTML scrape of Unsplash search results.
     -   **Fallback:** If live/scraped data is unavailable, it filters local mock inspiration data based on keywords in a user-provided prompt.
 -   **Analyzes Trends:** Identifies relevant UI/UX trends from the prompt and inspiration summary using an expanded keyword dictionary. Includes broader trend recognition for styles like cyberpunk, art deco, skeuomorphism, playful, and corporate aesthetics, among others.
 -   **Generates React + Tailwind CSS Code:**
@@ -18,7 +18,7 @@ The Frontend Trend Builder is an autonomous agent designed to streamline the ini
     -   Generates "full-page" layouts by assembling a sensible structure from available components.
     -   Applies styling to components responsive to identified trends and color modes.
 -   **Suggests Assets (Live & Mock Data):**
-    -   **Live Fonts (Conceptual):** Attempts to fetch font suggestions from the Google Fonts API if `GOOGLE_FONTS_API_KEY` is configured in `.env` and relevant font trends are identified.
+    -   **Live Fonts (Conceptual):** Attempts to fetch font suggestions from the Google Fonts API (using the `google_fonts_provider`) if `GOOGLE_FONTS_API_KEY` is configured in `.env` and relevant font trends are identified.
     -   **Mock Assets:** Recommends other assets (icons, images) and fallback fonts from local mock data, aligning with design trends and inspiration.
 
 ## Inputs
@@ -85,7 +85,7 @@ The application, via `config.py`, will load these settings from the `.env` file 
 
 **Important:** Remember to keep your `.env` file private and **do not commit it to version control**. The `.gitignore` file in this project is already configured to ignore `.env` files.
 
-**Note on API Usage Simulation:** The agent uses the `view_text_website` tool to simulate API calls. In a real-world scenario, these would be direct HTTP requests using libraries like `requests`.
+**Note on API Usage Simulation:** The agent uses the `view_text_website` tool (via `data_providers/http_client.py`) to simulate API calls. In a real-world scenario, these would be direct HTTP requests using libraries like `requests`.
 
 ## How to Run
 
@@ -95,7 +95,7 @@ The application, via `config.py`, will load these settings from the `.env` file 
 4.  The primary way to interact with the agent is by calling the `run_agent` function from `frontend_trend_builder.main`.
 
 ### Example Usage (Python Script)
-
+(Example script remains the same as previous version)
 ```python
 from frontend_trend_builder.main import run_agent
 from frontend_trend_builder.schema import AgentInput
@@ -134,19 +134,25 @@ output = run_agent(inputs)
 -   **API Key Requirement:** Live API integration for Unsplash and Google Fonts requires users to obtain and correctly configure their own API keys in the `.env` file. Without these, the agent gracefully falls back to mock data.
 -   **Experimental Scraping:** The HTML scraping for Unsplash inspiration is a basic implementation and is highly dependent on Unsplash's website structure. It may break if the site's HTML changes significantly.
 -   **API Rate Limits:** If using personal or demo API keys, be mindful of potential rate limits imposed by Unsplash and Google Fonts.
--   **Simulated API Calls:** External API calls are simulated using a `view_text_website` tool. A production version would use direct HTTP requests.
+-   **Simulated API Calls:** External API calls are simulated using a `view_text_website` tool (via `data_providers/http_client.py`). A production version would use direct HTTP requests.
 -   **Limited Scope of Analysis:** Trend analysis and inspiration matching are based on keyword dictionaries and simple text matching, not advanced AI/NLP.
 
 ## Directory Structure
 
 -   `frontend-trend-builder/`
-    -   `actions/`: Contains Python scripts for individual agent capabilities.
+    -   `actions/`: Contains Python scripts for individual agent capabilities (e.g., `gather_inspiration.py`, `generate_code.py`). These now call data providers for external data.
         -   `code_templates/`: Contains React+Tailwind CSS component string templates.
     -   `config.py`: Manages loading of API keys and other configurations from the `.env` file.
     -   `data/`: Contains JSON files for mock inspiration, trend definitions, and mock assets.
+    -   `data_providers/`: Contains modules responsible for fetching data from external APIs or sources (e.g., Unsplash, Google Fonts via `http_client.py`). Abstracts data fetching logic from the main actions.
+        -   `__init__.py`
+        -   `http_client.py`: Wrapper for `view_text_website` tool.
+        -   `unsplash_provider.py`: Fetches/scrapes data from Unsplash.
+        -   `google_fonts_provider.py`: Fetches data from Google Fonts API.
     -   `.env.example`: Example file for environment variable configuration.
     -   `.gitignore`: Specifies intentionally untracked files (like `.env`).
     -   `tests/`: Contains unit tests for the agent's components.
+        -   `data_providers/`: Contains tests for the data provider modules.
     -   `main.py`: The main executable script that orchestrates the agent's workflow and includes example runs.
     -   `schema.py`: Defines the data structures (`AgentInput`, `AgentOutput`) for agent inputs and outputs.
     -   `README.md`: This file.
